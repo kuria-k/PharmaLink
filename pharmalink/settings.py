@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'cashier',
     'reports',
     'core',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
