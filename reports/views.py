@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import AuditLog, ReportEntry
-from .urls import AuditLogSerializer, ReportEntrySerializer
+from .serializers import AuditLogSerializer, ReportEntrySerializer 
 from .utils import summarize_report
 
 class AuditLogListView(generics.ListAPIView):
