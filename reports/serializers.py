@@ -6,6 +6,7 @@ class AuditLogSerializer(serializers.ModelSerializer):
         model = AuditLog
         fields = ['id', 'action', 'actor', 'timestamp', 'details']
 
+
 class ReportEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportEntry

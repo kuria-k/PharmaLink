@@ -15,6 +15,7 @@ class AuditLog(models.Model):
     def __str__(self):
         return f"{self.timestamp} - {self.action} by {self.actor}"
 
+
 class ReportEntry(models.Model):
     report_type = models.CharField(max_length=50)
     generated_at = models.DateTimeField(auto_now_add=True)
@@ -23,6 +24,10 @@ class ReportEntry(models.Model):
 
     def __str__(self):
         return f"{self.report_type} @ {self.generated_at.strftime('%Y-%m-%d %H:%M')}"
+
+    def save(self, *args, **kwargs):
+        self.generate()  # ✅ Automatically populate summary and data
+        super().save(*args, **kwargs)
 
     def generate(self):
         now = timezone.now()
@@ -67,5 +72,4 @@ class ReportEntry(models.Model):
             f"Year-to-date: KSh {total_sales_year:.2f}"
         )
 
-        self.save()
 

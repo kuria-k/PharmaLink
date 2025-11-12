@@ -26,8 +26,10 @@ class ReportSummaryView(APIView):
 
 class GenerateReportView(APIView):
     def post(self, request):
-        report = ReportEntry(report_type="Automated Summary")
+        report_type = request.data.get('report_type', 'Automated Summary')
+        report = ReportEntry(report_type=report_type)
         report.generate()
         serializer = ReportEntrySerializer(report)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
