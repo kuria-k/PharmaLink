@@ -27,3 +27,16 @@ urlpatterns = [
     path('', include('cashier.urls')),
     path('', include('reports.urls'))
 ]
+
+# from django.contrib import admin
+# from django.urls import path, include
+
+# urlpatterns = [
+#     path('admin/', admin.site.urls),
+#     path('adminpanel/', include('adminpanel.urls')),
+#     path('api/', include('adminpanel.urls')),
+#     path('api/', include('sales.urls')),     
+#     path('api/', include('inventory.urls')),  
+#     path('api/', include('cashier.urls')),
+#     path('api/', include('reports.urls')),
+# ]

@@ -24,15 +24,18 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer()
-    branches = serializers.PrimaryKeyRelatedField(queryset=Branch.objects.all(), many=True)
+    branches = BranchSerializer(many=True, read_only=True)
+    branch_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Branch.objects.all(), many=True, write_only=True, source='branches'
+    )
 
     class Meta:
         model = UserProfile
-        fields = ['id', 'user', 'branches', 'role']
+        fields = ['id', 'user', 'branches', 'branch_ids', 'role']
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
-        branches = validated_data.pop('branches')
+        branches = validated_data.pop('branches', [])
         user = User.objects.create_user(**user_data)
         profile = UserProfile.objects.create(user=user, role=validated_data['role'])
         profile.branches.set(branches)
@@ -57,6 +60,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         instance.role = validated_data.get('role', instance.role)
         instance.save()
         return instance
+
 
 class ChangePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(write_only=True)
