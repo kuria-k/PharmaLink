@@ -15,7 +15,7 @@ const Users = () => {
     username: "",
     email: "",
     password: "",
-    role: "cashier",
+    role: "",
     branches: [],
   });
 
@@ -25,40 +25,60 @@ const Users = () => {
   }, []);
 
   const fetchUsers = async () => {
-    const res = await api.get("/profiles/");
-    setUsers(res.data);
+    try {
+      const res = await api.get("/profiles/");
+      setUsers(res.data);
+    } catch (err) {
+      console.error("Fetch users error:", err);
+      toast.error("Failed to load users");
+    }
   };
 
   const fetchBranches = async () => {
-    const res = await api.get("/branches/");
-    setBranches(res.data);
+    try {
+      const res = await api.get("/branches/");
+      setBranches(res.data);
+    } catch (err) {
+      console.error("Fetch branches error:", err);
+      toast.error("Failed to load branches");
+    }
   };
 
   const handleCreateOrUpdate = async () => {
     setLoading(true);
+
+    // Build payload carefully
     const payload = {
       user: {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
+        username: formData.username.trim(),
+        email: formData.email.trim(),
+        ...(formData.password ? { password: formData.password } : {}), // ✅ only include if not empty
       },
       role: formData.role,
-      branches: formData.branches.map(Number),
+      branch_ids: formData.branches.map(Number),
     };
 
     try {
       if (editingUser) {
-        await api.put(`/profiles/${editingUser.id}/`, payload);
-        toast.success("User updated");
+        // ✅ Use PATCH for partial updates
+        await api.patch(`/profiles/${editingUser.id}/`, payload);
+        toast.success("User updated successfully");
       } else {
         await api.post("/profiles/", payload);
-        toast.success("User created");
+        toast.success("User created successfully");
       }
       resetForm();
       fetchUsers();
     } catch (error) {
-      console.error("Save user error:", error.response?.data || error.message);
-      toast.error("Failed to save user");
+      const err = error.response?.data || {};
+      console.error("Save user error:", err);
+      toast.error(
+        err?.user?.username?.[0] ||
+          err?.user?.password?.[0] ||
+          err?.role?.[0] ||
+          err?.branch_ids?.[0] ||
+          "Failed to save user"
+      );
     } finally {
       setLoading(false);
     }
@@ -69,7 +89,7 @@ const Users = () => {
       username: "",
       email: "",
       password: "",
-      role: "cashier",
+      role: "",
       branches: [],
     });
     setEditingUser(null);
@@ -82,7 +102,7 @@ const Users = () => {
       email: user.user.email || "",
       password: "",
       role: user.role,
-      branches: user.branches.map((b) => String(b.id)),
+      branches: user.branches.map((b) => String(b.id)), // keep IDs as strings for UI
     });
   };
 
@@ -94,9 +114,13 @@ const Users = () => {
   const handleDeleteConfirmed = async () => {
     try {
       await api.delete(`/profiles/${userToDelete.id}/`);
-      toast.success("User deleted");
+      toast.success("User deleted successfully");
       fetchUsers();
-    } catch {
+    } catch (error) {
+      console.error(
+        "Delete user error:",
+        error.response?.data || error.message
+      );
       toast.error("Failed to delete user");
     } finally {
       setShowModal(false);
@@ -111,70 +135,133 @@ const Users = () => {
           Manage Users
         </h1>
 
-        {/* Form Section */}
-        <div className="bg-white/70 rounded-lg shadow-md p-6 mb-12">
+        {/* User Form */}
+        <div className="bg-white/70 rounded-xl shadow-md p-8 mb-12">
+          <h2 className="text-2xl font-semibold text-[#B57C36] mb-6 text-center">
+            {editingUser ? "Update User" : "Create User"}
+          </h2>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <input
-              className="w-full p-3 rounded-lg border border-[#B57C36]/40 bg-white text-black"
-              placeholder="Username"
-              value={formData.username}
-              onChange={(e) =>
-                setFormData({ ...formData, username: e.target.value })
-              }
-            />
-            <input
-              className="w-full p-3 rounded-lg border border-[#B57C36]/40 bg-white text-black"
-              placeholder="Email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-            />
-            <input
-              type="password"
-              className="w-full p-3 rounded-lg border border-[#B57C36]/40 bg-white text-black"
-              placeholder="Password"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-            />
-            <select
-              className="w-full p-3 rounded-lg border border-[#B57C36]/40 bg-white text-black"
-              value={formData.role}
-              onChange={(e) =>
-                setFormData({ ...formData, role: e.target.value })
-              }
-            >
-              <option value="cashier">Cashier</option>
-              <option value="sales">Sales</option>
-              <option value="inventory">Inventory</option>
-            </select>
-            <select
-              multiple
-              className="w-full p-3 rounded-lg border border-[#B57C36]/40 bg-white text-black"
-              value={formData.branches}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  branches: Array.from(
-                    e.target.selectedOptions,
-                    (opt) => opt.value
-                  ),
-                })
-              }
-            >
-              {branches.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
+            {/* Username */}
+            <div>
+              <label className="block text-sm font-medium text-[#B57C36] mb-2">
+                Username
+              </label>
+              <input
+                className="w-full p-3 rounded-lg border border-[#B57C36]/40 bg-white text-black"
+                placeholder="Enter username"
+                value={formData.username}
+                onChange={(e) =>
+                  setFormData({ ...formData, username: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-[#B57C36] mb-2">
+                Email
+              </label>
+              <input
+                className="w-full p-3 rounded-lg border border-[#B57C36]/40 bg-white text-black"
+                placeholder="Enter email"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-medium text-[#B57C36] mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                className="w-full p-3 rounded-lg border border-[#B57C36]/40 bg-white text-black"
+                placeholder="Enter password"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Role */}
+            <div>
+              <label className="block text-sm font-medium text-[#B57C36] mb-2">
+                Role
+              </label>
+              <select
+                className="w-full p-3 rounded-lg border border-[#B57C36]/40 bg-white text-black"
+                value={formData.role}
+                onChange={(e) =>
+                  setFormData({ ...formData, role: e.target.value })
+                }
+              >
+                <option value="">--Select Role--</option>
+                <option value="cashier">Cashier</option>
+                <option value="sales">Sales</option>
+                <option value="inventory">Inventory</option>
+              </select>
+            </div>
           </div>
+
+          {/* Branch Selector */}
+          <div className="mt-6">
+            <label className="block text-sm font-medium text-[#B57C36] mb-2">
+              Assign Branches
+            </label>
+            <div className="max-h-48 overflow-y-auto border border-[#B57C36]/40 rounded-lg bg-white p-3 space-y-2">
+              {branches.map((b) => (
+                <label
+                  key={b.id}
+                  className="flex items-center space-x-2 cursor-pointer hover:bg-[#B57C36]/10 rounded-md p-2 transition"
+                >
+                  <input
+                    type="checkbox"
+                    value={b.id}
+                    checked={formData.branches.includes(String(b.id))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFormData((prev) => ({
+                        ...prev,
+                        branches: prev.branches.includes(value)
+                          ? prev.branches.filter((id) => id !== value)
+                          : [...prev.branches, value],
+                      }));
+                    }}
+                    className="accent-[#B57C36]"
+                  />
+                  <span className="text-black">{b.name}</span>
+                </label>
+              ))}
+            </div>
+
+            {/* Selected Branches as Pills */}
+            {formData.branches.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {formData.branches.map((id) => {
+                  const branch = branches.find((b) => String(b.id) === id);
+                  return (
+                    <span
+                      key={id}
+                      className="px-3 py-1 bg-[#B57C36]/20 text-[#B57C36] rounded-full text-sm font-medium"
+                    >
+                      {branch?.name}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Submit Button */}
           <button
             onClick={handleCreateOrUpdate}
             disabled={loading}
-            className={`mt-6 w-full bg-[#B57C36] hover:bg-[#9E6B2F] text-white font-semibold py-3 rounded-lg ${
+            className={`mt-8 w-full bg-[#B57C36] hover:bg-[#9E6B2F] text-white font-semibold py-3 rounded-lg ${
               loading ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
@@ -191,7 +278,7 @@ const Users = () => {
         {/* Table Section */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-[#B57C36]">Users List</h2>
-          <span className="text-sm text-gray-600">
+          <span className="text-lg bg-[#B57C36]/80 text-white px-3 py-1 rounded-md shadow-md">
             Total Users: {users.length}
           </span>
         </div>
