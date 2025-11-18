@@ -90,8 +90,8 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email', 'password']
         extra_kwargs = {
-            'username': {'required': False},  # ✅ not required on update
-            'email': {'required': False},     # ✅ not required on update
+            'username': {'required': False},  # not required on update
+            'email': {'required': False},     # not required on update
         }
 
     def create(self, validated_data):
@@ -110,7 +110,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         many=True,
         write_only=True,
         source='branches',
-        required=False   # ✅ optional
+        required=False   # optional
     )
 
     class Meta:
@@ -134,7 +134,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
         if user_data:
             user = instance.user
-            # ✅ Only update fields if provided
+        # Only update fields if provided
             if 'username' in user_data:
                 user.username = user_data['username']
             if 'email' in user_data:

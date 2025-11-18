@@ -6,6 +6,13 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from .models import Branch, UserProfile
 from .serializers import ( BranchSerializer, UserSerializer, UserProfileSerializer, ChangePasswordSerializer)
+# from users.permissions import IsAdmin  
+
+# class AdminDashboardView(APIView):
+#     permission_classes = [IsAdmin]
+
+#     def get(self, request):
+#         return Response({"message": "Welcome Admin"})
 
 # class BranchViewSet(ModelViewSet):
 #     queryset = Branch.objects.all()

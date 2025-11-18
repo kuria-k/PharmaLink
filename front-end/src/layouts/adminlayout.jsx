@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import AdminSidebar from "../components/sidebars/admindash"; // ✅ Correct path
+import AdminSidebar from "../components/sidebars/admindash"; 
 
 const AdminLayout = () => {
   return (

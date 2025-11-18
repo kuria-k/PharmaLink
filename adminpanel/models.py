@@ -38,16 +38,16 @@ class UserProfile(models.Model):
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
-        related_name="profile"   # ✅ easier reverse lookup
+        related_name="profile"   #  easier reverse lookup
     )
     branches = models.ManyToManyField(
         Branch,
-        blank=True                # ✅ optional, avoids migration/validation errors
+        blank=True                #  optional, avoids migration/validation errors
     )
     role = models.CharField(
         max_length=50,
         choices=ROLE_CHOICES,
-        default='cashier'         # ✅ default role so it’s never empty
+        default='cashier'         # default role so it’s never empty
     )
 
     def __str__(self):
