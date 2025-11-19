@@ -29,38 +29,49 @@ class ProductValuationView(APIView):
         return Response(data)
 
 class AddOrUpdateProductView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         data = request.data
+        product_id = data.get("id")
         sku = data.get("sku")
 
+        if not product_id and not sku:
+            return Response(
+                {"error": "You must provide either 'id' or 'sku'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
-            product = Product.objects.get(sku=sku)
+            # Find existing product by id first, then sku
+            if product_id:
+                product = Product.objects.get(id=product_id)
+            else:
+                product = Product.objects.get(sku=sku)
 
-            # increment quantity safely
-            increment = int(data.get("quantity", 0))
-            Product.objects.filter(pk=product.pk).update(quantity=F("quantity") + increment)
+            # Let serializer handle quantity addition and field updates
+            serializer = ProductSerializer(product, data=data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
-            # update other fields if provided
-            if data.get("price_per_pack") is not None:
-                product.price_per_pack = data["price_per_pack"]
-            if data.get("price_per_piece") is not None:
-                product.price_per_piece = data["price_per_piece"]
-            if data.get("selling_price_per_pack") is not None:
-                product.selling_price_per_pack = data["selling_price_per_pack"]
-            if data.get("selling_price_per_piece") is not None:
-                product.selling_price_per_piece = data["selling_price_per_piece"]
-
-            product.save()
-            product.refresh_from_db()  
-
-            return Response(ProductSerializer(product).data, status=status.HTTP_200_OK)
+            return Response(
+                {"action": "updated", "product": serializer.data},
+                status=status.HTTP_200_OK
+            )
 
         except Product.DoesNotExist:
+            # Create new product if not found
             serializer = ProductSerializer(data=data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return Response(
+                {"action": "created", "product": serializer.data},
+                status=status.HTTP_201_CREATED
+            )
+
+
+
 
 
 class ProductListCreateView(generics.ListCreateAPIView):

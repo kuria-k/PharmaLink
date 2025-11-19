@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getBatches } from "../../utils/api"; 
+import { getBatches } from "../../utils/api";
 import axios from "axios";
 
 const BatchManagement = () => {
@@ -14,7 +14,7 @@ const BatchManagement = () => {
     const fetchBatches = async () => {
       try {
         const res = await getBatches();
-        setBatches(res.data); 
+        setBatches(res.data);
       } catch (err) {
         console.error("Error fetching batches:", err);
       } finally {
@@ -29,7 +29,7 @@ const BatchManagement = () => {
       const res = await axios.post(
         "http://localhost:8000/api/inventory/batches/from-completed/"
       );
-      setBatches([...batches, res.data.batch]); 
+      setBatches([...batches, res.data.batch]);
     } catch (err) {
       console.error("Error creating batch from completed POs:", err);
       alert("No completed purchase orders found or request failed.");
@@ -55,11 +55,15 @@ const BatchManagement = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="glass p-4 text-center">
-          <h2 className="text-lg font-semibold text-[#B57C36]">Total Batches</h2>
+          <h2 className="text-lg font-semibold text-[#B57C36]">
+            Total Batches
+          </h2>
           <p className="text-2xl font-bold">{batches.length}</p>
         </div>
         <div className="glass p-4 text-center">
-          <h2 className="text-lg font-semibold text-[#B57C36]">Total Quantity</h2>
+          <h2 className="text-lg font-semibold text-[#B57C36]">
+            Total Quantity
+          </h2>
           <p className="text-2xl font-bold">
             {batches.reduce((sum, b) => sum + Number(b.quantity || 0), 0)}
           </p>
@@ -103,8 +107,8 @@ const BatchManagement = () => {
             {paginated.map((b, idx) => (
               <tr key={idx} className="border-b">
                 <td className="p-3">{b.batch_no}</td>
-                <td className="p-3">{b.sku}</td>
-                <td className="p-3">{b.product}</td>
+                <td className="p-3">{b.product_sku}</td>
+                <td className="p-3">{b.product_name}</td>
                 <td className="p-3">{b.quantity}</td>
                 <td className="p-3">{b.supplier}</td>
                 <td className="p-3">{b.received}</td>
@@ -141,4 +145,3 @@ const BatchManagement = () => {
 };
 
 export default BatchManagement;
-

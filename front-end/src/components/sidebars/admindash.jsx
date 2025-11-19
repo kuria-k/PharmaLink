@@ -17,11 +17,11 @@ const AdminSidebar = () => {
     { label: "Dashboard", path: "/admin/dashboard" },
     { label: "Manage Users", path: "/admin/users" },
     { label: "Branches", path: "/admin/branches" },
-    { label: "Reports", path: "/admin/reports" },
   ];
 
   return (
     <>
+      {/* Mobile toggle button */}
       <button
         className="fixed top-4 left-4 z-50 md:hidden text-[#B57C36] bg-white/80 p-2 rounded-full shadow-lg"
         onClick={() => setIsOpen(!isOpen)}
@@ -62,36 +62,39 @@ const AdminSidebar = () => {
               Logout
             </button>
           </li>
-          {showLogoutModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-              <div className="bg-white/20 backdrop-blur-lg border border-white/30 shadow-2xl rounded-xl p-6 w-[90%] max-w-md text-black">
-                <h2 className="text-xl font-semibold text-center mb-4">
-                  Confirm Logout
-                </h2>
-                <p className="text-center text-gray-700 mb-6">
-                  Are you sure you want to log out?
-                </p>
-                <div className="flex justify-between">
-                  <button
-                    onClick={() => setShowLogoutModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded bg-white/60 hover:bg-white/80 transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </ul>
       </div>
+
+      {/* Full-screen Logout Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white/20 backdrop-blur-lg border border-white/30 shadow-2xl rounded-xl p-6 w-[90%] max-w-md text-black">
+            <h2 className="text-xl font-semibold text-center mb-4">
+              Confirm Logout
+            </h2>
+            <p className="text-center text-gray-700 mb-6">
+              Are you sure you want to log out?
+            </p>
+            <div className="flex justify-between">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded bg-white/60 hover:bg-white/80 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
 
 export default AdminSidebar;
+

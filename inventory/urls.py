@@ -18,7 +18,8 @@ urlpatterns = [
     path("suppliers/", SupplierListCreateView.as_view(), name="supplier-list-create"),
     path("suppliers/<int:pk>/", SupplierDetailView.as_view(), name="supplier-detail"),
     path("products/valuation/", ProductValuationView.as_view(), name="product-valuation"),
-    path("products/add-or-update/", AddOrUpdateProductView.as_view(), name="add_or_update_product"),
+    # path("products/add-or-update/", AddOrUpdateProductView.as_view(), name="add_or_update_product"),
+    path("products/upsert/", AddOrUpdateProductView.as_view(), name="product-upsert"),
 ]
 
 

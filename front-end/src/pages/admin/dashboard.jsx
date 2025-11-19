@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import api from '../../utils/api';
-import { Chart as ChartJS, CategoryScale, LinearScale,BarElement, Title, Tooltip, Legend,} from 'chart.js';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const Dashboard = () => {
-  const [stats, setStats] = useState({ users: 0, sales: 0, inventory: 0 });
+  const [stats, setStats] = useState({ users: 0, sales: 0, branches: 0 });
   const [branchSales, setBranchSales] = useState([]);
 
   useEffect(() => {
@@ -14,30 +23,39 @@ const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [usersRes, salesRes, productsRes, branchesRes] = await Promise.all([
-        api.get('/users/'),
-        api.get('/sales/'),
-        api.get('/products/'),
-        api.get('/branches/'),
+      // ✅ Hit your Django API endpoints
+      const [usersRes, salesRes, branchesRes] = await Promise.all([
+        api.get('/users/'),       // returns list of users
+        api.get('/sales/'),       // returns list of sales { total_amount, branch }
+        api.get('/branches/'),    // returns list of branches { name }
       ]);
 
-      const totalUsers = usersRes.data.length;
-      const totalSales = salesRes.data.reduce((sum, s) => sum + parseFloat(s.total_amount || 0), 0);
-      const totalInventory = productsRes.data.reduce((sum, p) => sum + (p.quantity || 0), 0);
+      // ✅ Totals
+      const totalUsers = Array.isArray(usersRes.data) ? usersRes.data.length : 0;
+      const totalSales = Array.isArray(salesRes.data)
+        ? salesRes.data.reduce((sum, s) => sum + parseFloat(s.total_amount || 0), 0)
+        : 0;
+      const totalBranches = Array.isArray(branchesRes.data) ? branchesRes.data.length : 0;
 
-      // Aggregate sales per branch
+      // ✅ Aggregate sales per branch
       const salesByBranch = {};
-      salesRes.data.forEach((sale) => {
-        const branchName = sale.branch?.name || 'Unknown';
-        salesByBranch[branchName] = (salesByBranch[branchName] || 0) + parseFloat(sale.total_amount || 0);
-      });
+      if (Array.isArray(salesRes.data)) {
+        salesRes.data.forEach((sale) => {
+          const branchName = sale.branch?.name || 'Unknown';
+          salesByBranch[branchName] =
+            (salesByBranch[branchName] || 0) + parseFloat(sale.total_amount || 0);
+        });
+      }
 
-      const branchSalesData = branchesRes.data.map((branch) => ({
-        name: branch.name,
-        total: salesByBranch[branch.name] || 0,
-      }));
+      const branchSalesData = Array.isArray(branchesRes.data)
+        ? branchesRes.data.map((branch) => ({
+            name: branch.name,
+            total: salesByBranch[branch.name] || 0,
+          }))
+        : [];
 
-      setStats({ users: totalUsers, sales: totalSales, inventory: totalInventory });
+      // ✅ Update state
+      setStats({ users: totalUsers, sales: totalSales, branches: totalBranches });
       setBranchSales(branchSalesData);
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -84,6 +102,7 @@ const Dashboard = () => {
           Admin Dashboard
         </h1>
 
+        {/* ✅ Stats cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           <Card
             title="Total Users"
@@ -96,12 +115,13 @@ const Dashboard = () => {
             className="bg-[#FDF6F0] border border-[#B57C36]/30 shadow-md hover:shadow-lg transition rounded-xl p-6 text-center"
           />
           <Card
-            title="Inventory Available"
-            value={stats.inventory}
+            title="Total Branches"
+            value={stats.branches}
             className="bg-[#FDF6F0] border border-[#B57C36]/30 shadow-md hover:shadow-lg transition rounded-xl p-6 text-center"
           />
         </div>
 
+        {/* ✅ Chart */}
         <div className="bg-white rounded-xl p-6 shadow-md">
           <Bar data={chartData} options={chartOptions} />
         </div>
@@ -118,6 +138,3 @@ const Card = ({ title, value, className }) => (
 );
 
 export default Dashboard;
-
-
-

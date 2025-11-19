@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import {getBranches, createBranch, updateBranch, deleteBranch,} from "../../utils/api";
+import {
+  getBranches,
+  createBranch,
+  updateBranch,
+  deleteBranch,
+} from "../../utils/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -8,7 +13,8 @@ const Branches = () => {
   const [formData, setFormData] = useState({ name: "", location: "" });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [branchToDelete, setBranchToDelete] = useState(null);
 
   const fetchBranches = async () => {
@@ -17,7 +23,6 @@ const Branches = () => {
       const res = await getBranches();
       setBranches(res.data);
     } catch (err) {
-      console.error("Fetch error:", err);
       toast.error("Failed to load branches");
     } finally {
       setLoading(false);
@@ -42,8 +47,7 @@ const Branches = () => {
       setFormData({ name: "", location: "" });
       setEditingId(null);
       fetchBranches();
-    } catch (err) {
-      console.error("Submit error:", err);
+    } catch {
       toast.error("Failed to save branch");
     } finally {
       setLoading(false);
@@ -53,11 +57,12 @@ const Branches = () => {
   const handleEdit = (branch) => {
     setFormData({ name: branch.name, location: branch.location });
     setEditingId(branch.id);
+    setShowEditModal(true);
   };
 
   const confirmDelete = (branch) => {
     setBranchToDelete(branch);
-    setShowModal(true);
+    setShowDeleteModal(true);
   };
 
   const handleDelete = async () => {
@@ -66,11 +71,10 @@ const Branches = () => {
       await deleteBranch(branchToDelete.id);
       toast.success("Branch deleted");
       fetchBranches();
-    } catch (err) {
-      console.error("Delete error:", err);
+    } catch {
       toast.error("Failed to delete branch");
     } finally {
-      setShowModal(false);
+      setShowDeleteModal(false);
       setBranchToDelete(null);
       setLoading(false);
     }
@@ -158,25 +162,68 @@ const Branches = () => {
           </table>
         </div>
 
-        {showModal && (
-          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white/30 backdrop-blur-md border border-white/40 shadow-xl rounded-xl p-6 w-80 text-black">
+        {/* Delete Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white/30 backdrop-blur-md border border-white/40 shadow-xl rounded-xl p-6 w-96 text-black">
               <p className="mb-4 text-center">
                 Are you sure you want to delete{" "}
                 <strong>{branchToDelete?.name}</strong>?
               </p>
               <div className="flex justify-between">
                 <button
-                  onClick={() => setShowModal(false)}
+                  onClick={() => setShowDeleteModal(false)}
                   className="px-4 py-2 border border-gray-300 rounded bg-white/60 hover:bg-white/80 transition"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                  className="px-4 py-2 bg-red-600/80 text-white rounded hover:bg-red-700 transition"
                 >
                   {loading ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Modal */}
+        {showEditModal && (
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white/30 backdrop-blur-md border border-white/40 shadow-xl rounded-xl p-6 w-96 text-black">
+              <h2 className="text-xl font-semibold text-[#B57C36] mb-4 text-center">
+                Edit Branch
+              </h2>
+              <input
+                className="w-full p-3 mb-4 rounded-lg border border-[#B57C36]/40 bg-white/80 text-black"
+                placeholder="Branch Name"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+              />
+              <input
+                className="w-full p-3 mb-4 rounded-lg border border-[#B57C36]/40 bg-white/80 text-black"
+                placeholder="Location"
+                value={formData.location}
+                onChange={(e) =>
+                  setFormData({ ...formData, location: e.target.value })
+                }
+              />
+              <div className="flex justify-between">
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded bg-white/60 hover:bg-white/80 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="px-4 py-2 bg-[#B57C36]/80 hover:bg-[#9E6B2F]/90 text-white rounded transition"
+                >
+                  {loading ? "Updating..." : "Update"}
                 </button>
               </div>
             </div>
@@ -190,3 +237,4 @@ const Branches = () => {
 };
 
 export default Branches;
+

@@ -31,7 +31,7 @@ const InventorySidebar = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("refresh");
     localStorage.removeItem("isInventoryUser");
-    navigate("/login"); // adjust if you have a dedicated inventory login route
+    navigate("/login"); 
   };
 
   const navItems = [
@@ -41,8 +41,8 @@ const InventorySidebar = () => {
     { label: "Purchase Orders", path: "/inventory/purchase-orders" },
     { label: "Inventory Valuation", path: "/inventory/valuation" },
     { label: "Add Inventory", path: "/inventory/add" },
-    { label: "Barcode Generator", path: "/inventory/barcode" },
-    { label: "Reports", path: "/inventory/reports" },
+    // { label: "Barcode Generator", path: "/inventory/barcode" },
+    // { label: "Reports", path: "/inventory/reports" },
     { label: "Suppliers", path: "/inventory/suppliers" },
   ];
 
@@ -63,7 +63,7 @@ const InventorySidebar = () => {
         } md:translate-x-0 md:block`}
       >
         <h2 className="text-xl font-bold mb-8 text-[#B57C36]">
-          Inventory Panel
+          PharmaLink Inventory 
         </h2>
         <ul className="space-y-2">
           {navItems.map((item) => (
