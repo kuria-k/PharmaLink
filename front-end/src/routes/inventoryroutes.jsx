@@ -1,4 +1,3 @@
-// src/routes/inventoryroutes.jsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import InventoryLayout from "../layouts/inventorylayout"; 

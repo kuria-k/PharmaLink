@@ -1,8 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, generics
-from .models import Sale
-from .serializers import SaleSerializer
+from rest_framework import status, generics,viewsets
+from sales.models import Sale, Customer
+from .serializers import SaleSerializer, CustomerSerializer
 from .utils import format_invoice
 
 # List and Create Sales
@@ -26,4 +26,15 @@ class SaleInvoiceView(APIView):
 
         invoice = format_invoice(sale)
         return Response(invoice)
+    
+
+# List all customers or create a new one
+class CustomerListCreateView(generics.ListCreateAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+
+# Retrieve, update, or delete a single customer
+class CustomerDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
 

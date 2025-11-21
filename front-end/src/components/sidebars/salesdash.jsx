@@ -1,18 +1,102 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { FiMenu, FiX } from "react-icons/fi";
 
-const SalesSidebar = () => (
-  <div className="w-64 h-screen fixed bg-white/30 backdrop-blur-md border-r border-[#B57C36] text-black p-6 shadow-xl">
-    <h2 className="text-xl font-bold mb-8 text-[#B57C36]">Sales Panel</h2>
-    <ul className="space-y-4">
-      <li><Link to="/sales/dashboard" className="hover:text-[#B57C36] font-medium">Dashboard</Link></li>
-      <li><Link to="/sales/reports" className="hover:text-[#B57C36] font-medium">Sales Reports</Link></li>
-      <li><Link to="/sales/top-products" className="hover:text-[#B57C36] font-medium">Top Products</Link></li>
-      <li><Link to="/sales/customers" className="hover:text-[#B57C36] font-medium">Customer Insights</Link></li>
-      <li><Link to="/sales/promotions" className="hover:text-[#B57C36] font-medium">Promotions</Link></li>
-      <li><Link to="/sales/export" className="hover:text-[#B57C36] font-medium">Export Data</Link></li>
-    </ul>
-  </div>
-);
+const SalesSidebar = () => {
+  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("isSalesUser");
+    navigate("/login");
+  };
+
+  const navItems = [
+    { label: "Dashboard", path: "/sales/dashboard" },
+    { label: "New Sale", path: "/sales/new" },
+    { label: "Invoices", path: "/sales/invoices" },
+    { label: "Customers", path: "/sales/customers" },
+    // { label: "Products", path: "/sales/products" },
+    { label: "Reports", path: "/sales/reports" },
+  ];
+
+  return (
+    <>
+      {/* Mobile toggle button */}
+      <button
+        className="fixed top-4 left-4 z-50 md:hidden text-[#B57C36] bg-white/30 backdrop-blur-md p-2 rounded-full shadow-lg"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+      </button>
+
+      {/* Sidebar */}
+      <div
+        className={`fixed top-0 left-0 h-screen w-64 bg-white/30 backdrop-blur-md border-r border-[#B57C36] text-black p-6 shadow-xl z-40 transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0 md:block`}
+      >
+        <h2 className="text-xl font-bold mb-8 text-[#B57C36]">PharmaLink Sales</h2>
+        <ul className="space-y-2">
+          {navItems.map((item) => (
+            <li key={item.path}>
+              <NavLink
+                to={item.path}
+                className={({ isActive }) =>
+                  `block px-4 py-2 rounded-lg font-medium transition duration-200 ${
+                    isActive
+                      ? "bg-[#B57C36] text-white shadow-md"
+                      : "hover:text-[#B57C36] text-black"
+                  }`
+                }
+                onClick={() => setIsOpen(false)}
+              >
+                {item.label}
+              </NavLink>
+            </li>
+          ))}
+          <li>
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              className="w-full text-left px-4 py-2 rounded-lg font-medium hover:text-red-500 transition duration-200"
+            >
+              Logout
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white/20 backdrop-blur-lg border border-white/30 shadow-2xl rounded-xl p-6 w-[90%] max-w-md text-black">
+            <h2 className="text-xl font-semibold text-center mb-4">Confirm Logout</h2>
+            <p className="text-center text-gray-700 mb-6">
+              Are you sure you want to log out?
+            </p>
+            <div className="flex justify-between">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded bg-white/60 hover:bg-white/80 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
 
 export default SalesSidebar;
+

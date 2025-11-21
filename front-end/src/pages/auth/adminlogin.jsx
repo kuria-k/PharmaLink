@@ -80,6 +80,10 @@ const AdminLogin = () => {
         localStorage.setItem("isInventory", "true");
         toast.success("Inventory login successful");
         navigate("/inventory/dashboard");
+      }else if (username === "SALES01" && password === "SALES@2025") {
+        localStorage.setItem("isSales", "true");
+        toast.success("Sales login successful");
+        navigate("/sales/dashboard");
       } else {
         toast.error("Invalid credentials", {
           position: "top-right",

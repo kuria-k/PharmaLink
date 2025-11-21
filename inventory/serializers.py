@@ -3,6 +3,7 @@ from .models import Product, Batch, PurchaseOrder, Supplier
 from decimal import Decimal
 
 class ProductSerializer(serializers.ModelSerializer):
+    stock = serializers.SerializerMethodField()
     class Meta:
         model = Product
         fields = "__all__"
@@ -53,6 +54,9 @@ class ProductSerializer(serializers.ModelSerializer):
                 validated_data[field] = Decimal(str(validated_data[field]))
 
         return super().create(validated_data)
+    
+    def get_stock(self, obj):
+        return obj.get_stock()
 
 
 

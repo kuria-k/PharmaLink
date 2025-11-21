@@ -37,13 +37,24 @@ class Product(models.Model):
         return self.name
 
 
-class Sale(models.Model):
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name="sales")
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)
+# class Sale(models.Model):
+#     branch = models.ForeignKey(
+#         'Branch',                      
+#         on_delete=models.CASCADE,
+#         related_name="sales",
+#         null=True,                     
+#         blank=True                    
+#     )
+#     total_amount = models.DecimalField(
+#         max_digits=12,
+#         decimal_places=2,
+#         default=0                      
+#     )
+#     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Sale {self.id} - {self.branch.name}"
+#     def __str__(self):
+#         branch_name = self.branch.name if self.branch else "No Branch"
+#         return f"Sale {self.id} - {branch_name} - {self.total_amount}"
 
 
 class UserProfile(models.Model):

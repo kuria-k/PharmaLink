@@ -159,7 +159,7 @@
 
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Branch, UserProfile, Product, Sale
+from .models import Branch, UserProfile, Product
 
 class BranchSerializer(serializers.ModelSerializer):
     class Meta:
@@ -192,12 +192,12 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['id', 'sku', 'name', 'quantity', 'price_per_pack']
 
 
-class SaleSerializer(serializers.ModelSerializer):
-    branch = BranchSerializer(read_only=True)
+# class SaleSerializer(serializers.ModelSerializer):
+#     branch = BranchSerializer(read_only=True)
 
-    class Meta:
-        model = Sale
-        fields = ['id', 'branch', 'total_amount', 'created_at']
+#     class Meta:
+#         model = Sale
+#         fields = ['id', 'branch', 'total_amount', 'created_at']
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

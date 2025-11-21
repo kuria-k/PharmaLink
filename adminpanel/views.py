@@ -55,14 +55,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
-from .models import Branch, UserProfile, Sale, Product
+from .models import Branch, UserProfile,Product
 from .serializers import (
     BranchSerializer,
     UserSerializer,
     UserProfileSerializer,
     ChangePasswordSerializer,
     ProductSerializer,
-    SaleSerializer
+    # SaleSerializer
 )
 
 # Branch Views
@@ -85,13 +85,13 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 # Sales
-class SaleListCreateView(generics.ListCreateAPIView):
-    queryset = Sale.objects.all()
-    serializer_class = SaleSerializer
+# class SaleListCreateView(generics.ListCreateAPIView):
+#     queryset = Sale.objects.all()
+#     serializer_class = SaleSerializer
 
-class SaleDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Sale.objects.all()
-    serializer_class = SaleSerializer
+# class SaleDetailView(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = Sale.objects.all()
+#     serializer_class = SaleSerializer
 
 # User Views
 class UserListCreateView(generics.ListCreateAPIView):

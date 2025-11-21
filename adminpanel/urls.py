@@ -36,8 +36,8 @@ from .views import (
     ChangePasswordView,
     ProductListCreateView,
     ProductDetailView,
-    SaleListCreateView,
-    SaleDetailView,
+    # SaleListCreateView,
+    # SaleDetailView,
 )
 
 urlpatterns = [
@@ -57,8 +57,8 @@ urlpatterns = [
     path('products/<int:pk>/', ProductDetailView.as_view(), name='product-detail'),
 
     # Sales endpoints
-    path('sales/', SaleListCreateView.as_view(), name='sale-list-create'),
-    path('sales/<int:pk>/', SaleDetailView.as_view(), name='sale-detail'),
+    # path('sales/', SaleListCreateView.as_view(), name='sale-list-create'),
+    # path('sales/<int:pk>/', SaleDetailView.as_view(), name='sale-detail'),
 
     # Change password
     path('change-password/', ChangePasswordView.as_view(), name='change-password'),

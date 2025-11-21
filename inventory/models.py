@@ -8,13 +8,12 @@ def generate_batch_no():
 def generate_po_number():
     return f"PO-{uuid.uuid4().hex[:6].upper()}"
 
-
 class Product(models.Model):
     name = models.CharField(max_length=100)
     sku = models.CharField(max_length=50, unique=True)
     category = models.CharField(max_length=50)
     supplier = models.CharField(max_length=100)
-    quantity = models.PositiveIntegerField(default=0)
+    quantity = models.PositiveIntegerField(default=0)  # store as packs or pieces
 
     # Pricing
     price_per_pack = models.DecimalField(max_digits=10, decimal_places=2)
@@ -39,7 +38,6 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        # auto-calculate reorder level before saving
         self.reorder_level = (self.daily_usage * self.lead_time) + self.safety_stock
         super().save(*args, **kwargs)
 
@@ -48,8 +46,21 @@ class Product(models.Model):
             return self.price_per_piece
         return self.price_per_pack / self.pieces_per_pack if self.pieces_per_pack else self.price_per_pack
 
+    def get_stock(self):
+     if self.unit_type == "pack":
+        available_packs = self.quantity
+        available_pieces = self.quantity * self.pieces_per_pack
+     else:  # unit_type == "piece"
+        available_pieces = self.quantity
+        available_packs = self.quantity // self.pieces_per_pack
+     return {
+        "available_packs": available_packs,
+        "available_pieces": available_pieces
+    }
+
     def __str__(self):
         return f"{self.name} ({self.sku})"
+
 
 
 class PurchaseOrder(models.Model):

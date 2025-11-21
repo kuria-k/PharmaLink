@@ -213,46 +213,52 @@ const api = axios.create({
 });
 
 // Branch endpoints
-//
 export const getBranches = () => api.get('/branches/');
 export const createBranch = (data) => api.post('/branches/', data);
 export const updateBranch = (id, data) => api.put(`/branches/${id}/`, data);
 export const deleteBranch = (id) => api.delete(`/branches/${id}/`);
 
-//
 // User endpoints
-//
 export const getUsers = () => api.get('/users/');
 
-//
 // Profile endpoints
-//
 export const getProfiles = () => api.get('/profiles/');
 export const createProfile = (data) => api.post('/profiles/', data);
 export const updateProfile = (id, data) => api.put(`/profiles/${id}/`, data);
 export const deleteProfile = (id) => api.delete(`/profiles/${id}/`);
 
-//
 // Product (Inventory) endpoints
-//
 export const getProducts = () => api.get('/inventory/products/');
 export const createInventory = (data) => api.post('/inventory/products/', data);
 export const updateProduct = (id, data) => api.put(`/inventory/products/${id}/`, data);
 export const deleteProduct = (id) => api.delete(`/inventory/products/${id}/`);
 export const getInventorySummary = () => api.get('/inventory/summary/');
 
-// batch endpoints
-export const getBatches = () => api.get("/inventory/batches/");
-export const createBatch = (data) => api.post("/inventory/batches/", data);
+// Batch endpoints
+export const getBatches = () => api.get('/inventory/batches/');
+export const createBatch = (data) => api.post('/inventory/batches/', data);
 export const updateBatch = (id, data) => api.put(`/inventory/batches/${id}/`, data);
 export const deleteBatch = (id) => api.delete(`/inventory/batches/${id}/`);
 
-// purchase order endpoints
-export const getPurchaseOrders = () => api.get("/inventory/purchase-orders/");
-export const createPurchaseOrder = (data) => api.post("/inventory/purchase-orders/", data);
+// Purchase order endpoints
+export const getPurchaseOrders = () => api.get('/inventory/purchase-orders/');
+export const createPurchaseOrder = (data) => api.post('/inventory/purchase-orders/', data);
 export const updatePurchaseOrder = (id, data) => api.put(`/inventory/purchase-orders/${id}/`, data);
 export const deletePurchaseOrder = (id) => api.delete(`/inventory/purchase-orders/${id}/`);
 
+// Clients endpoints
+export const getCustomers = () => api.get('/sales/customers/');
+export const createCustomer = (data) => api.post('/sales/customers/', data);
+export const updateCustomer = (id, data) => api.put(`/sales/customers/${id}/`, data);
+export const deleteCustomer = (id) => api.delete(`/sales/customers/${id}/`);
 
+
+// Sales endpoints
+export const getSales = () => api.get('/sales/');
+export const createSale = (data) => api.post('/sales/', data);
+export const updateSale = (id, data) => api.put(`/sales/${id}/`, data);
+export const deleteSale = (id) => api.delete(`/sales/${id}/`);
+export const getSaleInvoice = (id) => api.get(`/sales/${id}/invoice/`);
 
 export default api;
+
