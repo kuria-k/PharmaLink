@@ -249,17 +249,346 @@
 
 
 
-from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+# from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+# from rest_framework import serializers
+# from sales.models import Sale, SaleItem, Customer
+# from inventory.models import Product
+# import uuid
+
+
+# def safe_decimal(value, default="0.00"):
+#     """
+#     Safely convert a value to Decimal.
+#     Handles None, empty strings, bad strings, NaN/Infinity.
+#     """
+#     try:
+#         if value is None:
+#             return Decimal(default)
+#         if isinstance(value, (int, float, Decimal)):
+#             return Decimal(str(value))
+#         if isinstance(value, str):
+#             val = value.strip()
+#             if val == "" or val.lower() in ["nan", "inf", "infinity"]:
+#                 return Decimal(default)
+#             return Decimal(val)
+#         return Decimal(default)
+#     except (InvalidOperation, ValueError, TypeError):
+#         return Decimal(default)
+
+
+# def safe_quantize(value, default="0.00"):
+#     """
+#     Convert to Decimal and quantize to 2 decimal places safely.
+#     Always returns a finite Decimal with 2 dp.
+#     """
+#     d = safe_decimal(value, default)
+#     if not d.is_finite():
+#         d = Decimal(default)
+#     return d.quantize(Decimal("0.00"), rounding=ROUND_HALF_UP)
+
+
+# class SaleItemSerializer(serializers.ModelSerializer):
+#     product_name = serializers.CharField(source='product.name', read_only=True)
+
+#     class Meta:
+#         model = SaleItem
+#         fields = [
+#             'product',
+#             'product_name',
+#             'quantity',
+#             'unit',
+#             'price',
+#             'vat',
+#             'discount',
+#         ]
+
+#     def to_representation(self, instance):
+#         data = super().to_representation(instance)
+#         for field in ['price', 'vat', 'discount']:
+#             data[field] = str(safe_quantize(data[field]))
+#         return data
+
+
+# class SaleSerializer(serializers.ModelSerializer):
+#     items = SaleItemSerializer(many=True, read_only=True)
+#     item_inputs = serializers.ListSerializer(child=serializers.DictField(), write_only=True)
+#     invoice_number = serializers.CharField(read_only=True)
+#     total_amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+#     date = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = Sale
+#         fields = [
+#             'id',
+#             'customer_name',
+#             'date',
+#             'invoice_number',
+#             'total_amount',
+#             'items',
+#             'item_inputs',
+#         ]
+
+#     def get_date(self, obj):
+#         return obj.created_at.date().isoformat()
+
+#     def validate_item_inputs(self, value):
+#         if not value or len(value) == 0:
+#             raise serializers.ValidationError("At least one item is required.")
+
+#         for idx, item in enumerate(value, start=1):
+#             if not item.get("product"):
+#                 raise serializers.ValidationError({f"item_{idx}": "Product ID is required."})
+
+#             try:
+#                 quantity = int(item.get("quantity", 1))
+#                 if quantity <= 0:
+#                     raise serializers.ValidationError({f"item_{idx}": "Quantity must be greater than zero."})
+#             except (ValueError, TypeError):
+#                 raise serializers.ValidationError({f"item_{idx}": "Quantity must be a valid integer."})
+
+#             # enforce discount ≤ 15%
+#             discount = safe_decimal(item.get("discount"), "0.00")
+#             if discount < 0:
+#                 raise serializers.ValidationError({f"item_{idx}": "Discount cannot be negative."})
+#             if discount > Decimal("15"):
+#                 raise serializers.ValidationError({f"item_{idx}": "Discount cannot exceed 15%."})
+
+#             # enforce VAT = 16% by default
+#             vat = safe_decimal(item.get("vat"), "16.00")
+#             if vat != Decimal("16.00"):
+#                 raise serializers.ValidationError({f"item_{idx}": "VAT must be 16%."})
+
+#             if item.get("price") in (None, "", " "):
+#                 raise serializers.ValidationError({f"item_{idx}": "Price is required."})
+
+#         return value
+
+#     def _generate_invoice_number(self):
+#         return f"CS{str(uuid.uuid4())[:8].upper()}"
+
+#     def create(self, validated_data):
+#         items_data = validated_data.pop('item_inputs', [])
+#         if not items_data:
+#             raise serializers.ValidationError("At least one item is required to create a sale.")
+
+#         sale = Sale.objects.create(
+#             customer_name=validated_data.get('customer_name'),
+#             total_amount=safe_quantize(validated_data.get('total_amount')),
+#             invoice_number=self._generate_invoice_number(),
+#         )
+
+#         for item_data in items_data:
+#             product_id = item_data.get('product')
+#             try:
+#                 product = Product.objects.get(id=product_id)
+#             except Product.DoesNotExist:
+#                 raise serializers.ValidationError(f"Product with ID {product_id} does not exist.")
+
+#             quantity = int(item_data.get('quantity', 1))
+#             if hasattr(product, 'quantity'):
+#                 if product.quantity < quantity:
+#                     raise serializers.ValidationError(f"Insufficient stock for {product.name}.")
+#                 product.quantity -= quantity
+#                 product.save()
+
+#             SaleItem.objects.create(
+#                 sale=sale,
+#                 product=product,
+#                 quantity=quantity,
+#                 unit=item_data.get('unit', 'w'),
+#                 price=safe_quantize(item_data.get('price')),
+#                 vat=Decimal("16.00"),  # enforce VAT = 16%
+#                 discount=safe_quantize(item_data.get('discount')),
+#             )
+
+#         return sale
+
+
+# class CustomerSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Customer
+#         fields = "__all__"
+
+
+
+
+
+# from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+# from rest_framework import serializers
+# from sales.models import Sale, SaleItem, Customer
+# from inventory.models import Product
+# import uuid
+
+
+# def safe_decimal(value, default="0.00"):
+#     """
+#     Safely convert a value to Decimal.
+#     Handles None, empty strings, bad strings, NaN/Infinity.
+#     """
+#     try:
+#         if value is None:
+#             return Decimal(default)
+#         if isinstance(value, (int, float, Decimal)):
+#             return Decimal(str(value))
+#         if isinstance(value, str):
+#             val = value.strip()
+#             if val == "" or val.lower() in ["nan", "inf", "infinity"]:
+#                 return Decimal(default)
+#             return Decimal(val)
+#         return Decimal(default)
+#     except (InvalidOperation, ValueError, TypeError):
+#         return Decimal(default)
+
+
+# def safe_quantize(value, default="0.00"):
+#     """
+#     Convert to Decimal and quantize to 2 decimal places safely.
+#     Always returns a finite Decimal with 2 dp.
+#     """
+#     d = safe_decimal(value, default)
+#     if not d.is_finite():
+#         d = Decimal(default)
+#     return d.quantize(Decimal("0.00"), rounding=ROUND_HALF_UP)
+
+
+# class SaleItemSerializer(serializers.ModelSerializer):
+#     product_name = serializers.CharField(source='product.name', read_only=True)
+
+#     class Meta:
+#         model = SaleItem
+#         fields = [
+#             'product',
+#             'product_name',
+#             'quantity',
+#             'unit',
+#             'price',
+#             'vat',
+#             'discount',
+#         ]
+
+#     def to_representation(self, instance):
+#         """
+#         Safely format decimals when serializing for GET.
+#         Use instance.<field> (a Decimal) directly.
+#         """
+#         data = super().to_representation(instance)
+#         for field in ['price', 'vat', 'discount']:
+#             try:
+#                 val = getattr(instance, field)  # actual Decimal from DB
+#                 data[field] = f"{safe_quantize(val)}"
+#             except Exception:
+#                 data[field] = "0.00"
+#         return data
+
+
+# class SaleSerializer(serializers.ModelSerializer):
+#     items = SaleItemSerializer(many=True, read_only=True)
+#     item_inputs = serializers.ListSerializer(child=serializers.DictField(), write_only=True)
+#     invoice_number = serializers.CharField(read_only=True)
+#     total_amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+#     date = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = Sale
+#         fields = [
+#             'id',
+#             'customer_name',
+#             'date',
+#             'invoice_number',
+#             'total_amount',
+#             'items',
+#             'item_inputs',
+#         ]
+
+#     def get_date(self, obj):
+#         return obj.created_at.date().isoformat()
+
+#     def validate_item_inputs(self, value):
+#         if not value or len(value) == 0:
+#             raise serializers.ValidationError("At least one item is required.")
+
+#         for idx, item in enumerate(value, start=1):
+#             if not item.get("product"):
+#                 raise serializers.ValidationError({f"item_{idx}": "Product ID is required."})
+
+#             try:
+#                 quantity = int(item.get("quantity", 1))
+#                 if quantity <= 0:
+#                     raise serializers.ValidationError({f"item_{idx}": "Quantity must be greater than zero."})
+#             except (ValueError, TypeError):
+#                 raise serializers.ValidationError({f"item_{idx}": "Quantity must be a valid integer."})
+
+#             # enforce discount ≤ 15%
+#             discount = safe_decimal(item.get("discount"), "0.00")
+#             if discount < 0:
+#                 raise serializers.ValidationError({f"item_{idx}": "Discount cannot be negative."})
+#             if discount > Decimal("15"):
+#                 raise serializers.ValidationError({f"item_{idx}": "Discount cannot exceed 15%."})
+
+#             # enforce VAT = 16% by default
+#             vat = safe_decimal(item.get("vat"), "16.00")
+#             if vat != Decimal("16.00"):
+#                 raise serializers.ValidationError({f"item_{idx}": "VAT must be 16%."})
+
+#             if item.get("price") in (None, "", " "):
+#                 raise serializers.ValidationError({f"item_{idx}": "Price is required."})
+
+#         return value
+
+#     def _generate_invoice_number(self):
+#         return f"CS{str(uuid.uuid4())[:8].upper()}"
+
+#     def create(self, validated_data):
+#         items_data = validated_data.pop('item_inputs', [])
+#         if not items_data:
+#             raise serializers.ValidationError("At least one item is required to create a sale.")
+
+#         sale = Sale.objects.create(
+#             customer_name=validated_data.get('customer_name'),
+#             total_amount=safe_quantize(validated_data.get('total_amount')),
+#             invoice_number=self._generate_invoice_number(),
+#         )
+
+#         for item_data in items_data:
+#             product_id = item_data.get('product')
+#             try:
+#                 product = Product.objects.get(id=product_id)
+#             except Product.DoesNotExist:
+#                 raise serializers.ValidationError(f"Product with ID {product_id} does not exist.")
+
+#             quantity = int(item_data.get('quantity', 1))
+#             if hasattr(product, 'quantity'):
+#                 if product.quantity < quantity:
+#                     raise serializers.ValidationError(f"Insufficient stock for {product.name}.")
+#                 product.quantity -= quantity
+#                 product.save()
+
+#             SaleItem.objects.create(
+#                 sale=sale,
+#                 product=product,
+#                 quantity=quantity,
+#                 unit=item_data.get('unit', 'w'),
+#                 price=safe_quantize(item_data.get('price')),
+#                 vat=Decimal("16.00"),  # enforce VAT = 16%
+#                 discount=safe_quantize(item_data.get('discount')),
+#             )
+
+#         return sale
+
+
+# class CustomerSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Customer
+#         fields = "__all__"
+
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from rest_framework import serializers
 from sales.models import Sale, SaleItem, Customer
 from inventory.models import Product
+import uuid
 
 
-def safe_decimal(value, default=0):
-    """
-    Safely convert a value to Decimal.
-    Falls back to default if value is None, empty, or invalid.
-    """
+def safe_decimal(value, default="0.00"):
     try:
         if value is None:
             return Decimal(default)
@@ -267,7 +596,7 @@ def safe_decimal(value, default=0):
             return Decimal(str(value))
         if isinstance(value, str):
             val = value.strip()
-            if val == "":
+            if val == "" or val.lower() in ["nan", "inf", "infinity"]:
                 return Decimal(default)
             return Decimal(val)
         return Decimal(default)
@@ -275,214 +604,145 @@ def safe_decimal(value, default=0):
         return Decimal(default)
 
 
+def safe_quantize(value, default="0.00"):
+    d = safe_decimal(value, default)
+    if not d.is_finite():
+        d = Decimal(default)
+    try:
+        return d.quantize(Decimal("0.00"), rounding=ROUND_HALF_UP)
+    except InvalidOperation:
+        return Decimal(default).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP)
+
+
 class SaleItemSerializer(serializers.ModelSerializer):
-    """
-    Serializer for individual sale items.
-    Includes computed fields for discount and VAT rates/amounts.
-    """
-    product_name = serializers.CharField(source='product.name', read_only=True)
-    discount_rate = serializers.SerializerMethodField()
-    discount_amount = serializers.SerializerMethodField()
-    vat_rate = serializers.SerializerMethodField()
-    vat_amount = serializers.SerializerMethodField()
+    product_name = serializers.CharField(source="product.name", read_only=True)
 
     class Meta:
         model = SaleItem
         fields = [
-            'product',
-            'product_name',
-            'quantity',
-            'unit',
-            'price',
-            'vat',             # stored amount
-            'vat_rate',        # percentage
-            'vat_amount',      # amount
-            'discount',        # stored amount
-            'discount_rate',   # percentage
-            'discount_amount', # amount
+            "product",
+            "product_name",
+            "quantity",
+            "unit",
+            "price",
+            "vat",
+            "discount",
         ]
 
-    def get_discount_rate(self, obj):
-        line_total = safe_decimal(obj.price, 0) * safe_decimal(obj.quantity, 1)
-        if line_total > 0:
-            rate = (safe_decimal(obj.discount, 0) / line_total) * Decimal("100")
-            return str(rate.quantize(Decimal("0.00")))
-        return "0.00"
-
-    def get_discount_amount(self, obj):
-        return str(safe_decimal(obj.discount, 0).quantize(Decimal("0.00")))
-
-    def get_vat_rate(self, obj):
-        # If VAT is always 16%, you can hardcode or compute from amount
-        return "16.00"
-
-    def get_vat_amount(self, obj):
-        return str(safe_decimal(obj.vat, 0).quantize(Decimal("0.00")))
-
     def to_representation(self, instance):
-        """
-        Ensure price, VAT, and discount are always serialized as valid decimals.
-        """
         data = super().to_representation(instance)
-        for field in ['price', 'vat', 'discount']:
-            try:
-                data[field] = str(safe_decimal(data[field], 0).quantize(Decimal("0.00")))
-            except Exception:
-                data[field] = "0.00"
+        # Force safe decimals
+        data["price"] = str(safe_quantize(instance.price))
+        data["vat"] = str(safe_quantize(instance.vat, "16.00"))
+        data["discount"] = str(safe_quantize(instance.discount))
         return data
 
 
 class SaleSerializer(serializers.ModelSerializer):
-    """
-    Serializer for a full sale transaction.
-    Handles nested items and business logic for VAT/discount/stock.
-    """
     items = SaleItemSerializer(many=True, read_only=True)
     item_inputs = serializers.ListSerializer(child=serializers.DictField(), write_only=True)
     invoice_number = serializers.CharField(read_only=True)
-    total_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    total_amount = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        required=False,
+        default=Decimal("0.00"),
+    )
     date = serializers.SerializerMethodField()
 
     class Meta:
         model = Sale
         fields = [
-            'id',
-            'customer_name',
-            'date',
-            'invoice_number',
-            'total_amount',
-            'items',
-            'item_inputs',
+            "id",
+            "customer_name",
+            "date",
+            "invoice_number",
+            "total_amount",
+            "items",
+            "item_inputs",
         ]
 
-    # --- Custom validation for item_inputs ---
+    def get_date(self, obj):
+        return obj.created_at.date().isoformat()
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Force safe decimal output
+        data["total_amount"] = str(safe_quantize(instance.total_amount))
+        return data
+
     def validate_item_inputs(self, value):
-        """
-        Validate each item in item_inputs before creating the Sale.
-        """
-        if not value or len(value) == 0:
+        if not value:
             raise serializers.ValidationError("At least one item is required.")
 
         for idx, item in enumerate(value, start=1):
-            # Ensure product ID is provided
             if not item.get("product"):
-                raise serializers.ValidationError(
-                    {f"item_{idx}": "Product ID is required."}
-                )
+                raise serializers.ValidationError({f"item_{idx}": "Product ID is required."})
 
-            # Ensure quantity is positive
-            quantity = item.get("quantity", 1)
             try:
-                quantity = int(quantity)
+                quantity = int(item.get("quantity", 1))
                 if quantity <= 0:
-                    raise serializers.ValidationError(
-                        {f"item_{idx}": "Quantity must be greater than zero."}
-                    )
+                    raise serializers.ValidationError({f"item_{idx}": "Quantity must be greater than zero."})
             except (ValueError, TypeError):
-                raise serializers.ValidationError(
-                    {f"item_{idx}": "Quantity must be a valid integer."}
-                )
+                raise serializers.ValidationError({f"item_{idx}": "Quantity must be a valid integer."})
 
-            # Ensure discount is not negative
-            discount = safe_decimal(item.get("discount"), 0)
+            discount = safe_decimal(item.get("discount"), "0.00")
             if discount < 0:
-                raise serializers.ValidationError(
-                    {f"item_{idx}": "Discount cannot be negative."}
-                )
+                raise serializers.ValidationError({f"item_{idx}": "Discount cannot be negative."})
+            if discount > Decimal("15"):
+                raise serializers.ValidationError({f"item_{idx}": "Discount cannot exceed 15%."})
 
-            # Ensure VAT is not negative
-            vat = safe_decimal(item.get("vat"), 16)
-            if vat < 0:
-                raise serializers.ValidationError(
-                    {f"item_{idx}": "VAT cannot be negative."}
-                )
+            vat = safe_decimal(item.get("vat"), "16.00")
+            if vat.quantize(Decimal("0.00")) != Decimal("16.00"):
+                raise serializers.ValidationError({f"item_{idx}": "VAT must be 16%."})
+
+            if item.get("price") in (None, "", " "):
+                raise serializers.ValidationError({f"item_{idx}": "Price is required."})
 
         return value
 
+    def _generate_invoice_number(self):
+        return f"CS{str(uuid.uuid4())[:8].upper()}"
+
     def create(self, validated_data):
-        """
-        Create a Sale with its SaleItems, applying VAT and discounts.
-        """
-        items_data = validated_data.pop('item_inputs', [])
+        items_data = validated_data.pop("item_inputs", [])
         if not items_data:
             raise serializers.ValidationError("At least one item is required to create a sale.")
 
-        sale = Sale.objects.create(**validated_data)
-        total = Decimal("0.00")
+        sale = Sale.objects.create(
+            customer_name=validated_data.get("customer_name"),
+            total_amount=safe_quantize(validated_data.get("total_amount")),
+            invoice_number=self._generate_invoice_number(),
+        )
 
         for item_data in items_data:
-            # --- Extract per-item values ---
-            product_id = item_data.get('product')
-            quantity = int(item_data.get('quantity', 1))
-            unit = item_data.get('unit', 'w')
-
-            vat_rate = safe_decimal(item_data.get('vat'), 16)
-            discount_rate = safe_decimal(item_data.get('discount'), 0)
-
-            # --- Validate product existence ---
+            product_id = item_data.get("product")
             try:
                 product = Product.objects.get(id=product_id)
             except Product.DoesNotExist:
                 raise serializers.ValidationError(f"Product with ID {product_id} does not exist.")
 
-            price = safe_decimal(product.price_per_pack, 0)
+            quantity = int(item_data.get("quantity", 1))
+            if hasattr(product, "quantity"):
+                if product.quantity < quantity:
+                    raise serializers.ValidationError(f"Insufficient stock for {product.name}.")
+                product.quantity -= quantity
+                product.save()
 
-            # --- Calculations ---
-            line_total = price * quantity
-            discount_amount = (discount_rate / Decimal("100")) * line_total
-            taxable = line_total - discount_amount
-            vat_amount = (vat_rate / Decimal("100")) * taxable
-            nett = taxable + vat_amount
-
-            # --- Stock check + deduction ---
-            if product.quantity < quantity:
-                raise serializers.ValidationError(f"Insufficient stock for {product.name}.")
-            product.quantity -= quantity
-            product.save()
-
-            # --- Create SaleItem ---
             SaleItem.objects.create(
                 sale=sale,
                 product=product,
                 quantity=quantity,
-                unit=unit,
-                price=price.quantize(Decimal("0.00"), rounding=ROUND_HALF_UP),
-                vat=vat_amount.quantize(Decimal("0.00"), rounding=ROUND_HALF_UP),        # amount
-                discount=discount_amount.quantize(Decimal("0.00"), rounding=ROUND_HALF_UP),  # amount
+                unit=item_data.get("unit", "w"),
+                price=safe_quantize(item_data.get("price")),
+                vat=Decimal("16.00"),
+                discount=safe_quantize(item_data.get("discount")),
             )
 
-            total += nett
-
-        # --- Finalize sale total ---
-        sale.total_amount = total.quantize(Decimal("0.00"), rounding=ROUND_HALF_UP)
-        sale.save()
         return sale
-
-    def to_representation(self, instance):
-        """
-        Ensure total_amount is always serialized as a valid decimal.
-        """
-        data = super().to_representation(instance)
-        try:
-            data['total_amount'] = str(safe_decimal(data['total_amount'], 0).quantize(Decimal("0.00")))
-        except Exception:
-            data['total_amount'] = "0.00"
-        return data
-
-    def get_date(self, obj):
-        return obj.created_at.date().isoformat()
-
 
 
 class CustomerSerializer(serializers.ModelSerializer):
-    """Serializer for Customer model."""
     class Meta:
         model = Customer
         fields = "__all__"
-
-
-
-
-
-
-

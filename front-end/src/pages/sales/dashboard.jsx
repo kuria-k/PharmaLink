@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {
-  getSales,
-  getCustomers,
-} from "../../utils/api";
+import { getSales, getCustomers } from "../../utils/api";
+import { useNavigate } from "react-router-dom";
 
 const SalesDashboard = () => {
   const [stats, setStats] = useState({
@@ -13,6 +11,7 @@ const SalesDashboard = () => {
   });
   const [recentSales, setRecentSales] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,19 +24,27 @@ const SalesDashboard = () => {
 
         // Calculate stats
         const totalSales = salesData.length;
-        const revenue = salesData.reduce((sum, sale) => sum + (sale.amount || 0), 0);
+        const revenue = salesData.reduce(
+          (sum, sale) => sum + (Number(sale.total_amount) || 0),
+          0
+        );
         const invoices = salesData.filter((s) => s.invoice_number).length;
+
+        // Unique clients who actually bought something
+        const uniqueClientNames = new Set(
+          salesData.map((s) => s.customer_name).filter(Boolean)
+        );
 
         setStats({
           totalSales,
           revenue,
-          customers: customersData.length,
+          customers: uniqueClientNames.size || customersData.length,
           invoices,
         });
 
-        // Sort by date for recent sales
+        // Sort by created_at for recent sales
         const sortedSales = [...salesData].sort(
-          (a, b) => new Date(b.date) - new Date(a.date)
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
         );
         setRecentSales(sortedSales.slice(0, 10)); // show last 10
       } catch (err) {
@@ -53,7 +60,9 @@ const SalesDashboard = () => {
   if (loading) {
     return (
       <div className="p-6">
-        <h1 className="text-2xl font-bold text-[#B57C36]">Loading Sales Dashboard...</h1>
+        <h1 className="text-2xl font-bold text-[#B57C36]">
+          Loading Sales Dashboard...
+        </h1>
       </div>
     );
   }
@@ -64,11 +73,16 @@ const SalesDashboard = () => {
       <div className="glass p-6 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-[#B57C36]">Sales Dashboard</h1>
-          <p className="mt-2 text-gray-700">Track performance, revenue, and customer activity.</p>
+          <p className="mt-2 text-gray-700">
+            Track performance, revenue, and customer activity.
+          </p>
         </div>
-        <button className="bg-[#B57C36] hover:bg-[#9E6B2F] text-white px-6 py-2 rounded-lg">
+        {/* <button
+          onClick={() => navigate("/sales/new")}
+          className="bg-[#B57C36] hover:bg-[#9E6B2F] text-white px-6 py-2 rounded-lg"
+        >
           + New Sale
-        </button>
+        </button> */}
       </div>
 
       {/* KPI Cards */}
@@ -79,10 +93,12 @@ const SalesDashboard = () => {
         </div>
         <div className="glass p-4 text-center">
           <h2 className="text-lg font-semibold text-[#B57C36]">Revenue</h2>
-          <p className="text-2xl font-bold">Ksh {stats.revenue.toLocaleString()}</p>
+          <p className="text-2xl font-bold">
+            Ksh {stats.revenue.toLocaleString()}
+          </p>
         </div>
         <div className="glass p-4 text-center">
-          <h2 className="text-lg font-semibold text-[#B57C36]">Customers</h2>
+          <h2 className="text-lg font-semibold text-[#B57C36]">Clients</h2>
           <p className="text-2xl font-bold">{stats.customers}</p>
         </div>
         <div className="glass p-4 text-center">
@@ -98,21 +114,23 @@ const SalesDashboard = () => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-[#B57C36]/20 text-[#B57C36]">
-                <th className="p-3 text-left">Customer</th>
-                <th className="p-3 text-left">Product</th>
-                <th className="p-3 text-left">Amount</th>
-                <th className="p-3 text-left">Date</th>
                 <th className="p-3 text-left">Invoice</th>
+                <th className="p-3 text-left">Customer</th>
+                <th className="p-3 text-left">Total</th>
+                <th className="p-3 text-left">Date</th>
               </tr>
             </thead>
             <tbody>
               {recentSales.map((sale) => (
                 <tr key={sale.id} className="border-b hover:bg-gray-50">
-                  <td className="p-3">{sale.customer_name || "N/A"}</td>
-                  <td className="p-3">{sale.product_name || "N/A"}</td>
-                  <td className="p-3">Ksh {sale.amount}</td>
-                  <td className="p-3">{new Date(sale.date).toLocaleDateString()}</td>
                   <td className="p-3">{sale.invoice_number || "-"}</td>
+                  <td className="p-3">{sale.customer_name || "Walk-in"}</td>
+                  <td className="p-3">
+                    Ksh {Number(sale.total_amount).toLocaleString()}
+                  </td>
+                  <td className="p-3">
+                    {new Date(sale.created_at).toLocaleDateString()}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -137,5 +155,6 @@ const SalesDashboard = () => {
 };
 
 export default SalesDashboard;
+
 
 

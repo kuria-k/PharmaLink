@@ -175,7 +175,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email', 'password']
         extra_kwargs = {
-            'username': {'required': False},
+            'username': {'required': True},  # required for create
             'email': {'required': False},
         }
 
@@ -186,22 +186,17 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
 
+
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['id', 'sku', 'name', 'quantity', 'price_per_pack']
 
 
-# class SaleSerializer(serializers.ModelSerializer):
-#     branch = BranchSerializer(read_only=True)
-
-#     class Meta:
-#         model = Sale
-#         fields = ['id', 'branch', 'total_amount', 'created_at']
-
-
 class UserProfileSerializer(serializers.ModelSerializer):
+    # ✅ Nested user serializer (writable for create/update)
     user = UserSerializer()
+
     branches = BranchSerializer(many=True, read_only=True)
     branch_ids = serializers.PrimaryKeyRelatedField(
         queryset=Branch.objects.all(),
@@ -219,19 +214,28 @@ class UserProfileSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
+        # Extract nested user data
         user_data = validated_data.pop('user')
-        branches = validated_data.pop('branches', [])
-        user = User.objects.create_user(**user_data)
-        profile = UserProfile.objects.create(
-            user=user,
-            role=validated_data.get('role')
+        branch_data = validated_data.pop('branches', [])
+
+        # Create user
+        user = User.objects.create_user(
+            username=user_data['username'],
+            email=user_data.get('email', ''),
+            password=user_data.get('password')
         )
-        if branches:
-            profile.branches.set(branches)
+
+        # Create profile
+        profile = UserProfile.objects.create(user=user, role=validated_data.get('role'))
+
+        # Assign branches if provided
+        if branch_data:
+            profile.branches.set(branch_data)
+
         return profile
 
     def update(self, instance, validated_data):
-        # Handle nested user updates safely
+        # Handle nested user updates
         user_data = validated_data.pop('user', None)
         branches = validated_data.pop('branches', None)
 
@@ -255,7 +259,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return instance
 
 
-
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True)
+

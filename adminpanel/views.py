@@ -51,8 +51,11 @@
 
 
 from rest_framework import generics, status
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from .models import Branch, UserProfile,Product
@@ -64,6 +67,33 @@ from .serializers import (
     ProductSerializer,
     # SaleSerializer
 )
+
+
+@api_view(['POST'])
+def login_view(request):
+    username = request.data.get("username")
+    password = request.data.get("password")
+
+    user = authenticate(username=username, password=password)
+    if user is None:
+        return Response({"error": "Invalid credentials"}, status=400)
+
+    # Get user profile info
+    profile = user.profile
+    role = profile.role
+    branches = list(profile.branches.values("id", "name"))
+
+    # Generate JWT
+    refresh = RefreshToken.for_user(user)
+    access_token = str(refresh.access_token)
+
+    return Response({
+        "access": access_token,
+        "refresh": str(refresh),
+        "role": role,
+        "branches": branches,
+        "username": user.username,
+    })
 
 # Branch Views
 class BranchListCreateView(generics.ListCreateAPIView):

@@ -34,12 +34,13 @@ import Home from "./pages/home";
 import AdminLogin from "./pages/auth/adminlogin";
 import AdminRoutes from "./routes/adminroutes";
 import InventoryRoutes from "./routes/inventoryroutes";
-import SalesRoutes from "./routes/salesroutes";   
+import SalesRoutes from "./routes/salesroutes";   ; 
+
 
 const App = () => {
   const isAdmin = localStorage.getItem("isAdmin") === "true";
   const isInventory = localStorage.getItem("isInventory") === "true";
-  const isSales = localStorage.getItem("isSales") === "true"; // ✅ match your login code
+  const isSales = localStorage.getItem("isSales") === "true"; // match your login code
 
   return (
     <Router>

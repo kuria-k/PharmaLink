@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { getProducts, createSale, getCustomers, getSales } from "../../utils/api";
+import { getProducts, createSale, getCustomers } from "../../utils/api";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -48,7 +48,6 @@ const PosSaleDashboard = () => {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const navigate = useNavigate();
-
 
   useEffect(() => {
     getProducts()
@@ -138,86 +137,57 @@ const PosSaleDashboard = () => {
   //   }
   // };
   const handleSaveSale = async () => {
-    
-  try {
-    const payload = {
-      customer_name: clientName || "Walk-in",
-      client_number: clientNumber || "",
-      total_amount: Number(totals.nett) || 0,
-      item_inputs: items
-        .filter((it) => it.product && it.price)
-        .map((it) => {
-          const quantity = Number(it.quantity) || 0;
-          const price = Number(it.price) || 0;
-          const discountRate = Number(it.discount) || 0; // percentage
-          const vatRate = 16; // always 16%
-
-          return {
-            product: it.product,
-            quantity,
-            unit: it.unit,
-            price,
-            discount: discountRate,
-            vat: vatRate,
-          };
-        }),
-    };
-
-    const response = await createSale(payload);
-    console.log("Sale response:", response);
-
-    // Save the posted sale into state
-    setSelectedInvoice(response.data);
-
-    toast.success(
-      `Sale posted successfully! Invoice: ${response.data.invoice_number}, Total: ${formatKES(
-        response.data.total_amount
-      )}`,
-      {
-        style: {
-          background: "#22c55e",
-          color: "#064e3b",
-          fontWeight: "bold",
-        },
-      }
-    );
-
-    setShowConfirm(false);
-    setShowInvoice(true); // open modal
-    setItems([]); // reset cart
-  } catch (err) {
-    console.error("Sale post error:", err.response?.data || err.message);
-    toast.error("Failed to post sale");
-  }
-
-  useEffect(() => {
-    fetchSales();
-  }, []);
-
-  const fetchSales = async () => {
     try {
-      const res = await getSales();
-      setSales(res.data);
-      setFilteredSales(res.data);
-    } catch (err) {
-      console.error("Error fetching sales:", err);
-    }
-  };
+      const payload = {
+        customer_name: clientName || "Walk-in",
+        client_number: clientNumber || "",
+        total_amount: Number(totals.nett) || 0,
+        item_inputs: items
+          .filter((it) => it.product && it.price)
+          .map((it) => {
+            const quantity = Number(it.quantity) || 0;
+            const price = Number(it.price) || 0;
+            const discountRate = Number(it.discount) || 0; // percentage
+            const vatRate = 16; // always 16%
 
-  const handleFilter = () => {
-    if (!fromDate || !toDate) {
-      setFilteredSales(sales);
-      return;
+            return {
+              product: it.product,
+              quantity,
+              unit: it.unit,
+              price,
+              discount: discountRate,
+              vat: vatRate,
+            };
+          }),
+      };
+
+      const response = await createSale(payload);
+      console.log("Sale response:", response);
+
+      // ✅ Save the posted sale into state
+      setSelectedInvoice(response.data);
+
+      toast.success(
+        `Sale posted successfully! Invoice: ${
+          response.data.invoice_number
+        }, Total: ${formatKES(response.data.total_amount)}`,
+        {
+          style: {
+            background: "#22c55e",
+            color: "#064e3b",
+            fontWeight: "bold",
+          },
+        }
+      );
+
+      setShowConfirm(false);
+      setShowInvoice(true); // open modal
+      setItems([]); // reset cart
+    } catch (err) {
+      console.error("Sale post error:", err.response?.data || err.message);
+      toast.error("Failed to post sale");
     }
-    const from = new Date(fromDate);
-    const to = new Date(toDate);
-    const filtered = sales.filter((s) => {
-      const saleDate = new Date(s.created_at);
-      return saleDate >= from && saleDate <= to;
-    });
-    setFilteredSales(filtered);
   };
-};
 
   return (
     <section className="bg-gray-50 rounded-lg border shadow-md p-6">
@@ -890,87 +860,103 @@ const PosSaleDashboard = () => {
         )}
 
         {showInvoice && selectedInvoice && (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div className="bg-white p-8 rounded-lg shadow-2xl w-[800px] relative">
-      {/* Close Button */}
-      <button
-        className="absolute top-3 right-3 text-gray-600 hover:text-black"
-        onClick={() => setShowInvoice(false)}
-      >
-        ✖
-      </button>
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white p-8 rounded-lg shadow-2xl w-[800px] relative">
+              {/* Close Button */}
+              <button
+                className="absolute top-3 right-3 text-gray-600 hover:text-black"
+                onClick={() => setShowInvoice(false)}
+              >
+                ✖
+              </button>
 
-      {/* Header */}
-      <header className="border-b pb-4 mb-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-[#B57C36]">Invoice</h1>
-        <div className="text-right text-sm">
-          <p><strong>Pharmalink Ltd.</strong></p>
-          <p>Health Plaza, Nairobi</p>
-          <p>Email: support@pharmalink.com</p>
-        </div>
-      </header>
+              {/* Header */}
+              <header className="border-b pb-4 mb-4 flex justify-between items-center">
+                <h1 className="text-2xl font-bold text-[#B57C36]">Invoice</h1>
+                <div className="text-right text-sm">
+                  <p>
+                    <strong>Pharmalink Ltd.</strong>
+                  </p>
+                  <p>Health Plaza, Nairobi</p>
+                  <p>Email: support@pharmalink.com</p>
+                </div>
+              </header>
 
-      {/* Client Info */}
-      <section className="mb-4 text-sm">
-        <p><strong>Invoice No:</strong> {selectedInvoice.invoice_number}</p>
-        <p><strong>Customer:</strong> {selectedInvoice.customer_name}</p>
-        <p><strong>Date:</strong> {selectedInvoice.date}</p>
-      </section>
+              {/* Client Info */}
+              <section className="mb-4 text-sm">
+                <p>
+                  <strong>Invoice No:</strong> {selectedInvoice.invoice_number}
+                </p>
+                <p>
+                  <strong>Customer:</strong> {selectedInvoice.customer_name}
+                </p>
+                <p>
+                  <strong>Date:</strong> {selectedInvoice.date}
+                </p>
+              </section>
 
-      {/* Items Table */}
-      <div id="invoice-print">
-        <table className="w-full border-collapse mb-6 text-sm">
-          <thead>
-            <tr className="bg-[#B57C36] text-white">
-              <th className="p-2 text-left">Product</th>
-              <th className="p-2 text-left">Qty</th>
-              <th className="p-2 text-left">Unit</th>
-              <th className="p-2 text-left">Price</th>
-              <th className="p-2 text-left">Discount (%)</th>
-              <th className="p-2 text-left">VAT (%)</th>
-              <th className="p-2 text-left">Line Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {selectedInvoice.items?.map((item, idx) => {
-              const lineTotal =
-                Number(item.quantity) * Number(item.price) -
-                ((Number(item.discount) / 100) * Number(item.quantity) * Number(item.price)) +
-                ((Number(item.vat) / 100) * (Number(item.quantity) * Number(item.price)));
+              {/* Items Table */}
+              <div id="invoice-print">
+                <table className="w-full border-collapse mb-6 text-sm">
+                  <thead>
+                    <tr className="bg-[#B57C36] text-white">
+                      <th className="p-2 text-left">Product</th>
+                      <th className="p-2 text-left">Qty</th>
+                      <th className="p-2 text-left">Unit</th>
+                      <th className="p-2 text-left">Price</th>
+                      <th className="p-2 text-left">Discount (%)</th>
+                      <th className="p-2 text-left">VAT (%)</th>
+                      <th className="p-2 text-left">Line Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedInvoice.items?.map((item, idx) => {
+                      const lineTotal =
+                        Number(item.quantity) * Number(item.price) -
+                        (Number(item.discount) / 100) *
+                          Number(item.quantity) *
+                          Number(item.price) +
+                        (Number(item.vat) / 100) *
+                          (Number(item.quantity) * Number(item.price));
 
-              return (
-                <tr key={idx} className="border-b">
-                  <td className="p-2">{item.product_name}</td>
-                  <td className="p-2">{item.quantity}</td>
-                  <td className="p-2">{item.unit}</td>
-                  <td className="p-2">{formatKES(item.price)}</td>
-                  <td className="p-2 text-red-600">{item.discount}%</td>
-                  <td className="p-2">{item.vat}%</td>
-                  <td className="p-2 font-semibold text-[#B57C36]">
-                    {formatKES(lineTotal)}
-                  </td>
-                </tr>
-              );
-            })}
-            <tr>
-              <td colSpan={6} className="p-2 font-semibold text-right">
-                Grand Total
-              </td>
-              <td className="p-2 font-bold text-[#B57C36]">
-                {formatKES(selectedInvoice.total_amount)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                      return (
+                        <tr key={idx} className="border-b">
+                          <td className="p-2">{item.product_name}</td>
+                          <td className="p-2">{item.quantity}</td>
+                          <td className="p-2">{item.unit}</td>
+                          <td className="p-2">{formatKES(item.price)}</td>
+                          <td className="p-2 text-red-600">{item.discount}%</td>
+                          <td className="p-2">{item.vat}%</td>
+                          <td className="p-2 font-semibold text-[#B57C36]">
+                            {formatKES(lineTotal)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    <tr>
+                      <td colSpan={6} className="p-2 font-semibold text-right">
+                        Grand Total
+                      </td>
+                      <td className="p-2 font-bold text-[#B57C36]">
+                        {formatKES(selectedInvoice.total_amount)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
-      {/* Footer Buttons */}
-      <div className="mt-6 flex justify-end gap-4">
-      <button
-  onClick={() => {
-    const printContents = document.getElementById("invoice-print").innerHTML;
-    const printWindow = window.open("", "", "width=800,height=600");
-    printWindow.document.write(`
+              {/* Footer Buttons */}
+              <div className="mt-6 flex justify-end gap-4">
+                <button
+                  onClick={() => {
+                    const printContents =
+                      document.getElementById("invoice-print").innerHTML;
+                    const printWindow = window.open(
+                      "",
+                      "",
+                      "width=800,height=600"
+                    );
+                    printWindow.document.write(`
       <html>
         <head>
           <title>Invoice ${selectedInvoice.invoice_number}</title>
@@ -1020,29 +1006,24 @@ const PosSaleDashboard = () => {
         </body>
       </html>
     `);
-    printWindow.document.close();
-    printWindow.print();
-  }}
-  className="px-6 py-2 bg-[#B57C36] text-white rounded-lg shadow hover:bg-[#a66a2f] transition"
->
-  Print Invoice
-</button>
+                    printWindow.document.close();
+                    printWindow.print();
+                  }}
+                  className="px-6 py-2 bg-[#B57C36] text-white rounded-lg shadow hover:bg-[#a66a2f] transition"
+                >
+                  Print Invoice
+                </button>
 
-        <button
-      onClick={() => {
-        setShowInvoice(false);      
-        navigate("/sales/invoices"); 
-      }}
-      className="px-6 py-2 bg-gray-500 text-white rounded-lg shadow hover:bg-gray-600 transition"
-    >
-      Close
-    </button>
-      </div>
-    </div>
-  </div>
-)}
-
-
+                <button
+                  onClick={() => setShowInvoice(false)}
+                  className="px-6 py-2 bg-gray-500 text-white rounded-lg shadow hover:bg-gray-600 transition"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       <Toaster
         reverseOrder={false}

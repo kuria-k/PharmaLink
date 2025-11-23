@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const SalesSidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();   //  get current path
   const [isOpen, setIsOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -16,10 +17,8 @@ const SalesSidebar = () => {
 
   const navItems = [
     { label: "Dashboard", path: "/sales/dashboard" },
-    { label: "New Sale", path: "/sales/new" },
-    { label: "Invoices", path: "/sales/invoices" },
+    { label: "Sales & Invoices", path: "/sales/invoices" },
     { label: "Customers", path: "/sales/customers" },
-    // { label: "Products", path: "/sales/products" },
     { label: "Reports", path: "/sales/reports" },
   ];
 
@@ -41,23 +40,34 @@ const SalesSidebar = () => {
       >
         <h2 className="text-xl font-bold mb-8 text-[#B57C36]">PharmaLink Sales</h2>
         <ul className="space-y-2">
-          {navItems.map((item) => (
-            <li key={item.path}>
-              <NavLink
-                to={item.path}
-                className={({ isActive }) =>
-                  `block px-4 py-2 rounded-lg font-medium transition duration-200 ${
+          {navItems.map((item) => {
+            // 👇 custom active logic
+            let isActive = false;
+            if (item.path === "/sales/invoices") {
+              // Active if path starts with /sales/invoices OR is /sales/new
+              isActive =
+                location.pathname.startsWith("/sales/invoices") ||
+                location.pathname === "/sales/new";
+            } else {
+              isActive = location.pathname === item.path;
+            }
+
+            return (
+              <li key={item.path}>
+                <NavLink
+                  to={item.path}
+                  className={`block px-4 py-2 rounded-lg font-medium transition duration-200 ${
                     isActive
                       ? "bg-[#B57C36] text-white shadow-md"
                       : "hover:text-[#B57C36] text-black"
-                  }`
-                }
-                onClick={() => setIsOpen(false)}
-              >
-                {item.label}
-              </NavLink>
-            </li>
-          ))}
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  {item.label}
+                </NavLink>
+              </li>
+            );
+          })}
           <li>
             <button
               onClick={() => setShowLogoutModal(true)}
@@ -99,4 +109,5 @@ const SalesSidebar = () => {
 };
 
 export default SalesSidebar;
+
 
