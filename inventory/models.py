@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from datetime import date
 
 # Utility functions for auto-generated numbers
 def generate_batch_no():
@@ -7,6 +8,7 @@ def generate_batch_no():
 
 def generate_po_number():
     return f"PO-{uuid.uuid4().hex[:6].upper()}"
+
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
@@ -37,6 +39,9 @@ class Product(models.Model):
     safety_stock = models.PositiveIntegerField(default=10)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Expiry tracking
+    expiry_date = models.DateField(null=True, blank=True)
+
     def save(self, *args, **kwargs):
         self.reorder_level = (self.daily_usage * self.lead_time) + self.safety_stock
         super().save(*args, **kwargs)
@@ -47,20 +52,23 @@ class Product(models.Model):
         return self.price_per_pack / self.pieces_per_pack if self.pieces_per_pack else self.price_per_pack
 
     def get_stock(self):
-     if self.unit_type == "pack":
-        available_packs = self.quantity
-        available_pieces = self.quantity * self.pieces_per_pack
-     else:  # unit_type == "piece"
-        available_pieces = self.quantity
-        available_packs = self.quantity // self.pieces_per_pack
-     return {
-        "available_packs": available_packs,
-        "available_pieces": available_pieces
-    }
+        if self.unit_type == "pack":
+            available_packs = self.quantity
+            available_pieces = self.quantity * self.pieces_per_pack
+        else:  # unit_type == "piece"
+            available_pieces = self.quantity
+            available_packs = self.quantity // self.pieces_per_pack
+        return {
+            "available_packs": available_packs,
+            "available_pieces": available_pieces
+        }
+
+    def is_expired(self):
+        """Check if product is expired."""
+        return self.expiry_date is not None and self.expiry_date < date.today()
 
     def __str__(self):
         return f"{self.name} ({self.sku})"
-
 
 
 class PurchaseOrder(models.Model):
@@ -90,10 +98,10 @@ class Batch(models.Model):
     supplier = models.CharField(max_length=100)
     received = models.DateField()
     orders = models.ManyToManyField("PurchaseOrder", related_name="batches", blank=True)
-    
 
     def __str__(self):
         return f"{self.batch_no} - {self.product.name}"
+
 
 class Supplier(models.Model):
     name = models.CharField(max_length=100)
@@ -102,7 +110,7 @@ class Supplier(models.Model):
     email = models.EmailField(blank=True)
     address = models.CharField(max_length=255, blank=True)
     country = models.CharField(max_length=100, blank=True)
-   
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

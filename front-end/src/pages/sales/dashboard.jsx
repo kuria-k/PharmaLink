@@ -6,7 +6,8 @@ const SalesDashboard = () => {
   const [stats, setStats] = useState({
     totalSales: 0,
     revenue: 0,
-    customers: 0,
+    registeredCustomers: 0,
+    activeCustomers: 0,
     invoices: 0,
   });
   const [recentSales, setRecentSales] = useState([]);
@@ -22,31 +23,37 @@ const SalesDashboard = () => {
         const salesData = salesRes.data || [];
         const customersData = customersRes.data || [];
 
-        // Calculate stats
+        // --- Stats ---
         const totalSales = salesData.length;
+
         const revenue = salesData.reduce(
           (sum, sale) => sum + (Number(sale.total_amount) || 0),
           0
         );
+
         const invoices = salesData.filter((s) => s.invoice_number).length;
 
-        // Unique clients who actually bought something
-        const uniqueClientNames = new Set(
+        // Registered customers = all customers in DB
+        const registeredCustomers = customersData.length;
+
+        // Active customers = unique names from sales
+        const activeCustomers = new Set(
           salesData.map((s) => s.customer_name).filter(Boolean)
-        );
+        ).size;
 
         setStats({
           totalSales,
           revenue,
-          customers: uniqueClientNames.size || customersData.length,
+          registeredCustomers,
+          activeCustomers,
           invoices,
         });
 
-        // Sort by created_at for recent sales
+        // --- Recent Sales ---
         const sortedSales = [...salesData].sort(
           (a, b) => new Date(b.created_at) - new Date(a.created_at)
         );
-        setRecentSales(sortedSales.slice(0, 10)); // show last 10
+        setRecentSales(sortedSales.slice(0, 10));
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
       } finally {
@@ -77,16 +84,10 @@ const SalesDashboard = () => {
             Track performance, revenue, and customer activity.
           </p>
         </div>
-        {/* <button
-          onClick={() => navigate("/sales/new")}
-          className="bg-[#B57C36] hover:bg-[#9E6B2F] text-white px-6 py-2 rounded-lg"
-        >
-          + New Sale
-        </button> */}
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <div className="glass p-4 text-center">
           <h2 className="text-lg font-semibold text-[#B57C36]">Total Sales</h2>
           <p className="text-2xl font-bold">{stats.totalSales}</p>
@@ -98,8 +99,12 @@ const SalesDashboard = () => {
           </p>
         </div>
         <div className="glass p-4 text-center">
-          <h2 className="text-lg font-semibold text-[#B57C36]">Clients</h2>
-          <p className="text-2xl font-bold">{stats.customers}</p>
+          <h2 className="text-lg font-semibold text-[#B57C36]">Registered Clients</h2>
+          <p className="text-2xl font-bold">{stats.registeredCustomers}</p>
+        </div>
+        <div className="glass p-4 text-center">
+          <h2 className="text-lg font-semibold text-[#B57C36]">Active Clients</h2>
+          <p className="text-2xl font-bold">{stats.activeCustomers}</p>
         </div>
         <div className="glass p-4 text-center">
           <h2 className="text-lg font-semibold text-[#B57C36]">Invoices</h2>
@@ -139,7 +144,7 @@ const SalesDashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="glass p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* <div className="glass p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
         <button className="bg-[#B57C36] hover:bg-[#9E6B2F] text-white px-6 py-4 rounded-lg">
           View Reports
         </button>
@@ -149,12 +154,9 @@ const SalesDashboard = () => {
         <button className="bg-[#B57C36] hover:bg-[#9E6B2F] text-white px-6 py-4 rounded-lg">
           Sales Products
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };
 
 export default SalesDashboard;
-
-
-

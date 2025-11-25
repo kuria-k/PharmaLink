@@ -21,7 +21,6 @@
 // export const getSales = () => api.get('/sales/');
 // export const getProducts = () => api.get('/products/');
 
-
 // export default api;
 
 //  import axios from 'axios';
@@ -32,7 +31,6 @@
 //     'Content-Type': 'application/json',
 //   },
 
-  
 // });
 
 // export const getBranches = () => api.get('/branches/');
@@ -40,9 +38,7 @@
 // export const updateBranch = (id, data) => api.put(`/branches/${id}/`, data);
 // export const deleteBranch = (id) => api.delete(`/branches/${id}/`);
 
-
 // export default api;
-
 
 // import axios from 'axios';
 
@@ -83,7 +79,7 @@
 // export const updateBranch = (id, data) => api.put(`/branches/${id}/`, data);
 // export const deleteBranch = (id) => api.delete(`/branches/${id}/`);
 
-// // Auth endpoints 
+// // Auth endpoints
 // export const login = (username, password) =>
 //   api.post('/token/', { username, password });
 // export const refreshToken = (refresh) =>
@@ -94,7 +90,7 @@
 // import axios from 'axios';
 
 // const api = axios.create({
-//   baseURL: 'http://localhost:8000/api', 
+//   baseURL: 'http://localhost:8000/api',
 //   headers: {
 //     'Content-Type': 'application/json',
 //   },
@@ -175,8 +171,6 @@
 // export const updateProduct = (id, data) => api.put(`/inventory/products/${id}/`, data);
 // export const deleteProduct = (id) => api.delete(`/inventory/products/${id}/`);
 
-
-
 // //
 // // Auth endpoints
 // // export const login = async (username, password) => {
@@ -202,65 +196,146 @@
 
 // export default api;
 
+// import axios from 'axios';
 
-import axios from 'axios';
+// const api = axios.create({
+//   baseURL: 'http://localhost:8000/api',
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// });
+
+// // Branch endpoints
+// export const getBranches = () => api.get('/branches/');
+// export const createBranch = (data) => api.post('/branches/', data);
+// export const updateBranch = (id, data) => api.put(`/branches/${id}/`, data);
+// export const deleteBranch = (id) => api.delete(`/branches/${id}/`);
+
+// // User endpoints
+// export const getUsers = () => api.get('/users/');
+
+// // Profile endpoints
+// export const getProfiles = () => api.get('/profiles/');
+// export const createProfile = (data) => api.post('/profiles/', data);
+// export const updateProfile = (id, data) => api.put(`/profiles/${id}/`, data);
+// export const deleteProfile = (id) => api.delete(`/profiles/${id}/`);
+
+// // Product (Inventory) endpoints
+// export const getProducts = () => api.get('/inventory/products/');
+// export const createInventory = (data) => api.post('/inventory/products/', data);
+// export const updateProduct = (id, data) => api.put(`/inventory/products/${id}/`, data);
+// export const deleteProduct = (id) => api.delete(`/inventory/products/${id}/`);
+// export const getInventorySummary = () => api.get('/inventory/summary/');
+
+// // Batch endpoints
+// export const getBatches = () => api.get('/inventory/batches/');
+// export const createBatch = (data) => api.post('/inventory/batches/', data);
+// export const updateBatch = (id, data) => api.put(`/inventory/batches/${id}/`, data);
+// export const deleteBatch = (id) => api.delete(`/inventory/batches/${id}/`);
+
+// // Purchase order endpoints
+// export const getPurchaseOrders = () => api.get('/inventory/purchase-orders/');
+// export const createPurchaseOrder = (data) => api.post('/inventory/purchase-orders/', data);
+// export const updatePurchaseOrder = (id, data) => api.put(`/inventory/purchase-orders/${id}/`, data);
+// export const deletePurchaseOrder = (id) => api.delete(`/inventory/purchase-orders/${id}/`);
+
+// // Clients endpoints
+// export const getCustomers = () => api.get('/sales/customers/');
+// export const createCustomer = (data) => api.post('/sales/customers/', data);
+// export const updateCustomer = (id, data) => api.put(`/sales/customers/${id}/`, data);
+// export const deleteCustomer = (id) => api.delete(`/sales/customers/${id}/`);
+
+// // Sales endpoints
+// export const getSales = () => api.get('/sales/');
+// export const createSale = (data) => api.post('/sales/', data);
+// export const updateSale = (id, data) => api.put(`/sales/${id}/`, data);
+// export const deleteSale = (id) => api.delete(`/sales/${id}/`);
+// // export const getSaleInvoice = (id) => api.get(`/sales/${id}/invoice/`);
+// export const getSaleInvoice = (id) => api.get(`/sales/${id}/`);
+
+// export default api;
+
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: "http://localhost:8000/api",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Branch endpoints
-export const getBranches = () => api.get('/branches/');
-export const createBranch = (data) => api.post('/branches/', data);
+export const getBranches = () => api.get("/branches/");
+export const createBranch = (data) => api.post("/branches/", data);
 export const updateBranch = (id, data) => api.put(`/branches/${id}/`, data);
 export const deleteBranch = (id) => api.delete(`/branches/${id}/`);
 
-// User endpoints
-export const getUsers = () => api.get('/users/');
+//  User endpoints
+export const getUsers = () => api.get("/users/");
 
 // Profile endpoints
-export const getProfiles = () => api.get('/profiles/');
-export const createProfile = (data) => api.post('/profiles/', data);
+export const getProfiles = () => api.get("/profiles/");
+export const createProfile = (data) => api.post("/profiles/", data);
 export const updateProfile = (id, data) => api.put(`/profiles/${id}/`, data);
 export const deleteProfile = (id) => api.delete(`/profiles/${id}/`);
 
 // Product (Inventory) endpoints
-export const getProducts = () => api.get('/inventory/products/');
-export const createInventory = (data) => api.post('/inventory/products/', data);
-export const updateProduct = (id, data) => api.put(`/inventory/products/${id}/`, data);
+export const getProducts = () => api.get("/inventory/products/");
+export const createInventory = (data) => api.post("/inventory/products/", data);
+export const updateProduct = (id, data) =>
+  api.put(`/inventory/products/${id}/`, data);
 export const deleteProduct = (id) => api.delete(`/inventory/products/${id}/`);
-export const getInventorySummary = () => api.get('/inventory/summary/');
+export const getInventorySummary = () => api.get("/inventory/summary/");
 
 // Batch endpoints
-export const getBatches = () => api.get('/inventory/batches/');
-export const createBatch = (data) => api.post('/inventory/batches/', data);
-export const updateBatch = (id, data) => api.put(`/inventory/batches/${id}/`, data);
+export const getBatches = () => api.get("/inventory/batches/");
+export const createBatch = (data) => api.post("/inventory/batches/", data);
+export const updateBatch = (id, data) =>
+  api.put(`/inventory/batches/${id}/`, data);
 export const deleteBatch = (id) => api.delete(`/inventory/batches/${id}/`);
 
 // Purchase order endpoints
-export const getPurchaseOrders = () => api.get('/inventory/purchase-orders/');
-export const createPurchaseOrder = (data) => api.post('/inventory/purchase-orders/', data);
-export const updatePurchaseOrder = (id, data) => api.put(`/inventory/purchase-orders/${id}/`, data);
-export const deletePurchaseOrder = (id) => api.delete(`/inventory/purchase-orders/${id}/`);
+export const getPurchaseOrders = () => api.get("/inventory/purchase-orders/");
+export const createPurchaseOrder = (data) =>
+  api.post("/inventory/purchase-orders/", data);
+export const updatePurchaseOrder = (id, data) =>
+  api.put(`/inventory/purchase-orders/${id}/`, data);
+export const deletePurchaseOrder = (id) =>
+  api.delete(`/inventory/purchase-orders/${id}/`);
 
-// Clients endpoints
-export const getCustomers = () => api.get('/sales/customers/');
-export const createCustomer = (data) => api.post('/sales/customers/', data);
-export const updateCustomer = (id, data) => api.put(`/sales/customers/${id}/`, data);
+// Clients (Customers) endpoints
+export const getCustomers = () => api.get("/sales/customers/");
+export const createCustomer = (data) => api.post("/sales/customers/", data);
+export const updateCustomer = (id, data) =>
+  api.put(`/sales/customers/${id}/`, data);
 export const deleteCustomer = (id) => api.delete(`/sales/customers/${id}/`);
 
-
 // Sales endpoints
-export const getSales = () => api.get('/sales/');
-export const createSale = (data) => api.post('/sales/', data);
+export const getSales = () => api.get("/sales/");
+export const createSale = (data) => api.post("/sales/", data);
 export const updateSale = (id, data) => api.put(`/sales/${id}/`, data);
 export const deleteSale = (id) => api.delete(`/sales/${id}/`);
-// export const getSaleInvoice = (id) => api.get(`/sales/${id}/invoice/`);
 export const getSaleInvoice = (id) => api.get(`/sales/${id}/`);
+
+// Cashier (Payment) endpoints
+export const getPayments = (status = null) => {
+  let url = "cashier/payments/";
+  if (status) {
+    url += `?status=${status}`;
+  }
+  return api.get(url);
+};
+
+export const createPayment = (data) => api.post("cashier/payments/", data);
+
+export const initiateStkPush = (saleId) =>
+  api.post(`cashier/payments/${saleId}/stkpush/`);
+
+export const confirmPayment = (saleId, data) =>
+  api.post(`cashier/payments/${saleId}/confirm/`, data);
+
+export const getDashboardStats = () =>
+  api.get("cashier/dashboard/");
 
 
 export default api;
-

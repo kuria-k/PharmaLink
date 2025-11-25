@@ -20,7 +20,9 @@ const formatCurrency = (value) =>
 const InventoryValuation = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(""); 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const entriesPerPage = 10;
 
   // Fetch product valuation data from backend
   useEffect(() => {
@@ -42,6 +44,14 @@ const InventoryValuation = () => {
       p.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredProducts.length / entriesPerPage);
+  const startIndex = (currentPage - 1) * entriesPerPage;
+  const currentProducts = filteredProducts.slice(
+    startIndex,
+    startIndex + entriesPerPage
+  );
+
   // Totals (based on filtered products)
   const totalCostValue = filteredProducts.reduce(
     (sum, p) => sum + p.costPrice * p.quantity,
@@ -60,12 +70,12 @@ const InventoryValuation = () => {
       {
         label: "Cost Value",
         data: filteredProducts.map((p) => p.costPrice * p.quantity),
-        backgroundColor: "rgba(181, 124, 54, 0.6)", 
+        backgroundColor: "rgba(181, 124, 54, 0.6)",
       },
       {
         label: "Selling Value",
         data: filteredProducts.map((p) => p.sellingPrice * p.quantity),
-        backgroundColor: "rgba(54, 162, 235, 0.6)", 
+        backgroundColor: "rgba(54, 162, 235, 0.6)",
       },
     ],
   };
@@ -103,7 +113,10 @@ const InventoryValuation = () => {
           type="text"
           placeholder="Search by product name or SKU..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // reset to first page when searching
+          }}
           className="w-full p-3 rounded-lg bg-white/50 border border-[#B57C36]/40"
         />
       </div>
@@ -140,7 +153,7 @@ const InventoryValuation = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map((p) => (
+            {currentProducts.map((p) => (
               <tr key={p.id} className="border-b hover:bg-gray-50">
                 <td className="p-3">{p.name}</td>
                 <td className="p-3">{p.sku}</td>
@@ -153,6 +166,35 @@ const InventoryValuation = () => {
             ))}
           </tbody>
         </table>
+
+        {/* Pagination Controls */}
+        <div className="flex justify-center items-center mt-4 space-x-2">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+            className={`px-3 py-1 rounded ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "bg-[#B57C36] text-white hover:bg-[#9E6B2F]"
+            }`}
+          >
+            Prev
+          </button>
+          <span className="px-2 text-[#B57C36] font-semibold">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            className={`px-3 py-1 rounded ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "bg-[#B57C36] text-white hover:bg-[#9E6B2F]"
+            }`}
+          >
+            Next
+          </button>
+        </div>
       </div>
 
       {/* Chart */}
@@ -167,6 +209,7 @@ const InventoryValuation = () => {
 };
 
 export default InventoryValuation;
+
 
 
 

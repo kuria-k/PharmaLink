@@ -53,7 +53,6 @@
 
 // export default AdminLogin;
 
-
 // import React, { useState } from "react";
 // import { useNavigate } from "react-router-dom";
 // import { toast, ToastContainer } from "react-toastify";
@@ -178,68 +177,94 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-const AdminLogin = () => {
+const AdminLogin = ({ setRole, setLoadingRole, tabId }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  /** Save role + user info scoped to this tab */
+  const saveSession = (role, userInfo, tokens = {}) => {
+    // Role + user
+    localStorage.setItem(`role-${tabId}`, role);
+    localStorage.setItem(`user-${tabId}`, JSON.stringify(userInfo));
+
+    // Tokens
+    if (tokens.access) localStorage.setItem(`accessToken-${tabId}`, tokens.access);
+    if (tokens.refresh) localStorage.setItem(`refreshToken-${tabId}`, tokens.refresh);
+    if (tokens.branches) localStorage.setItem(`branches-${tabId}`, JSON.stringify(tokens.branches));
+
+    // Update React state
+    setRole(role);
+  };
+
+  /** Navigate to dashboard with splash */
+  const goToDashboard = (role) => {
+    setLoadingRole(true);
+    const path = `/${role}/dashboard`;
+    setTimeout(() => {
+      navigate(path);
+      setLoadingRole(false);
+    }, 1000);
+  };
+
   const handleLogin = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
+    setLoadingRole(true);
 
-  // Hardcoded admin credentials
-  if (username === "ADMIN01" && password === "ADMIN@2025") {
-    localStorage.setItem("role", "admin");
-    toast.success("Admin login successful");
-    navigate("/admin/dashboard");
-    setLoading(false);
-    return;
-  }
-
-  try {
-    const response = await fetch("http://localhost:8000/api/login/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      localStorage.setItem("accessToken", data.access);
-      localStorage.setItem("refreshToken", data.refresh);
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("branches", JSON.stringify(data.branches));
-
-      toast.success("Login successful");
-
-      switch (data.role) {
-        case "admin":
-          navigate("/admin/dashboard");
-          break;
-        case "inventory":
-          navigate("/inventory/dashboard");
-          break;
-        case "sales":
-          navigate("/sales/dashboard");
-          break;
-        case "cashier":
-          navigate("/cashier/dashboard");
-          break;
-        default:
-          navigate("/");
-      }
-    } else {
-      toast.error(data.error || "Invalid credentials");
+    // Hardcoded admin
+    if (username === "ADMIN01" && password === "ADMIN@2025") {
+      const userInfo = { username: "ADMIN01", role: "admin" };
+      saveSession("admin", userInfo);
+      toast.success("Admin login successful");
+      goToDashboard("admin");
+      setLoading(false);
+      return;
     }
-  } catch (err) {
-    toast.error("Server error. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+
+    try {
+      const response = await fetch("http://localhost:8000/api/login/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const userInfo = {
+          username: data.user?.username || username,
+          email: data.user?.email || "",
+          role: data.role,
+        };
+
+        // Save everything scoped to tab
+        saveSession(data.role, userInfo, {
+          access: data.access,
+          refresh: data.refresh,
+          branches: data.branches || [],
+        });
+
+        if (["admin", "inventory", "sales", "cashier"].includes(data.role)) {
+          toast.success("Login successful");
+          goToDashboard(data.role);
+        } else {
+          toast.error("Unknown role. Contact support.");
+          setLoadingRole(false);
+        }
+      } else {
+        toast.error(data.error || "Invalid credentials");
+        setLoadingRole(false);
+      }
+    } catch (err) {
+      toast.error("Server error. Please try again.");
+      setLoadingRole(false);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200">
@@ -317,13 +342,14 @@ export default AdminLogin;
 
 
 
+
 // import React, { useState } from "react";
 // import { useNavigate } from "react-router-dom";
 // import { toast, ToastContainer } from "react-toastify";
 // import "react-toastify/dist/ReactToastify.css";
 // import { FaEye, FaEyeSlash } from "react-icons/fa";
 // import {jwtDecode} from "jwt-decode";
-// import { login } from "../../utils/api";  
+// import { login } from "../../utils/api";
 
 // const AdminLogin = () => {
 //   const [username, setUsername] = useState("");
