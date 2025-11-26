@@ -191,9 +191,15 @@ const AdminLogin = ({ setRole, setLoadingRole, tabId }) => {
     localStorage.setItem(`user-${tabId}`, JSON.stringify(userInfo));
 
     // Tokens
-    if (tokens.access) localStorage.setItem(`accessToken-${tabId}`, tokens.access);
-    if (tokens.refresh) localStorage.setItem(`refreshToken-${tabId}`, tokens.refresh);
-    if (tokens.branches) localStorage.setItem(`branches-${tabId}`, JSON.stringify(tokens.branches));
+    if (tokens.access)
+      localStorage.setItem(`accessToken-${tabId}`, tokens.access);
+    if (tokens.refresh)
+      localStorage.setItem(`refreshToken-${tabId}`, tokens.refresh);
+    if (tokens.branches)
+      localStorage.setItem(
+        `branches-${tabId}`,
+        JSON.stringify(tokens.branches)
+      );
 
     // Update React state
     setRole(role);
@@ -225,7 +231,7 @@ const AdminLogin = ({ setRole, setLoadingRole, tabId }) => {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/login/", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -339,9 +345,6 @@ const AdminLogin = ({ setRole, setLoadingRole, tabId }) => {
 };
 
 export default AdminLogin;
-
-
-
 
 // import React, { useState } from "react";
 // import { useNavigate } from "react-router-dom";
