@@ -1,0 +1,13 @@
+services:
+  - type: static_site
+    name: pharmalink-frontend
+    rootDir: front-end
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    redirects:
+      - source: /*
+        destination: /index.html
+        status: 200
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://pharmalink-84jl.onrender.com

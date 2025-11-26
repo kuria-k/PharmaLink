@@ -69,7 +69,7 @@ MIDDLEWARE = [
 ]
 
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = "https://pharmalink-frontend.onrender.com",
 
 ROOT_URLCONF = 'pharmalink.urls'
 
