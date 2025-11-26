@@ -50,7 +50,7 @@ const Home = () => {
           {/* Slide 1 */}
           <div
             className="relative h-[600px] bg-cover bg-center"
-            style={{ backgroundImage: "url('/images/pharmacy1.jpg')" }}
+            // style={{ backgroundImage: "url('/images/pharmacy1.jpg')" }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/40 flex flex-col items-center justify-center text-center text-white px-6">
               <h2 className="text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[#B57C36] to-yellow-400 bg-clip-text text-transparent animate-fadeIn">
@@ -73,7 +73,7 @@ const Home = () => {
           {/* Slide 2 */}
           <div
             className="relative h-[600px] bg-cover bg-center"
-            style={{ backgroundImage: "url('/images/pharmacy2.jpg')" }}
+            // style={{ backgroundImage: "url('/images/pharmacy2.jpg')" }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/40 flex flex-col items-center justify-center text-center text-white px-6">
               <h2 className="text-5xl md:text-6xl font-extrabold mb-4 animate-fadeIn">
@@ -88,7 +88,7 @@ const Home = () => {
           {/* Slide 3 */}
           <div
             className="relative h-[600px] bg-cover bg-center"
-            style={{ backgroundImage: "url('/images/pharmacy3.jpg')" }}
+            // style={{ backgroundImage: "url('/images/pharmacy3.jpg')" }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/40 flex flex-col items-center justify-center text-center text-white px-6">
               <h2 className="text-5xl md:text-6xl font-extrabold mb-4 animate-fadeIn">
