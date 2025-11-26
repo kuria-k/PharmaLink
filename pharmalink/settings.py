@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-i#_zmo&a=r-n5&$ph_rvb$d&5%y*_tq28uy&lrmsuz-37)6w7m'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["https://pharmalink-84jl.onrender.com"]
 
 
 # Application definition

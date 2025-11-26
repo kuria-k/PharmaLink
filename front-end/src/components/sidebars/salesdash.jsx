@@ -1,8 +1,9 @@
+// components/sidebars/SalesSidebar.jsx
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { FiMenu, FiX, FiUser } from "react-icons/fi";
 
-const AdminSidebar = () => {
+const SalesSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
@@ -36,16 +37,24 @@ const AdminSidebar = () => {
     navigate("/login");
   };
 
+  // Sales-specific navigation items
   const navItems = [
-    { label: "Dashboard", path: "/admin/dashboard" },
-    { label: "Users", path: "/admin/users" },
-    { label: "Reports", path: "/admin/reports" },
-    { label: "Settings", path: "/admin/settings" },
+    { label: "Dashboard", path: "/sales/dashboard" },
+    // We won’t show “New Sale” here, but we’ll keep it linked to Invoices
+    { label: "Invoices", path: "/sales/invoices" },
+    { label: "Customers", path: "/sales/customers" },
+    // { label: "Products", path: "/sales/products" },
+    { label: "Reports", path: "/sales/reports" },
   ];
+
+  // Custom active check: keep Invoices active also when on /sales/new
+  const isInvoicesActive =
+    location.pathname.startsWith("/sales/invoices") ||
+    location.pathname.startsWith("/sales/new");
 
   return (
     <>
-      {/* Mobile toggle */}
+      {/* Mobile toggle button */}
       <button
         className="fixed top-4 left-4 z-50 md:hidden text-[#B57C36] bg-white/30 backdrop-blur-md p-2 rounded-full shadow-lg"
         onClick={() => setIsOpen(!isOpen)}
@@ -61,10 +70,14 @@ const AdminSidebar = () => {
       >
         {/* Top section */}
         <div>
-          <h2 className="text-xl font-bold mb-8 text-[#B57C36]">PharmaLink Admin</h2>
+          <h2 className="text-xl font-bold mb-8 text-[#B57C36]">PharmaLink Sales</h2>
           <ul className="space-y-2">
             {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
+              const isActive =
+                item.path === "/sales/invoices"
+                  ? isInvoicesActive
+                  : location.pathname.startsWith(item.path);
+
               return (
                 <li key={item.path}>
                   <NavLink
@@ -136,7 +149,7 @@ const AdminSidebar = () => {
   );
 };
 
-export default AdminSidebar;
+export default SalesSidebar;
 
 
 

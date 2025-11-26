@@ -23,8 +23,8 @@ const Home = () => {
             <button
               onClick={() => navigate("/admin/login")}
               className="bg-[#B57C36] text-white font-bold px-6 py-3 rounded-full shadow-lg 
-               hover:bg-[#9E6B2F] transform hover:scale-105 transition-all duration-300 
-               animate-bounce"
+             hover:bg-[#9E6B2F] transform hover:scale-105 transition-all duration-300 
+             animate-bounce"
             >
               GET STARTED
             </button>
@@ -33,98 +33,89 @@ const Home = () => {
       </nav>
 
       {/* Hero Section with Carousel */}
- <section className="relative mt-[72px] overflow-hidden">
-  {/* Decorative background glow */}
-  <div className="absolute top-10 left-10 w-40 h-40 bg-[#B57C36]/30 rounded-full blur-3xl animate-pulse"></div>
-  <div className="absolute bottom-20 right-10 w-56 h-56 bg-yellow-400/20 rounded-full blur-2xl animate-ping"></div>
+      <section className="relative mt-[72px] overflow-hidden">
+        {/* Decorative background glow */}
+        <div className="absolute top-10 left-10 w-40 h-40 bg-[#B57C36]/30 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-56 h-56 bg-yellow-400/20 rounded-full blur-2xl animate-ping"></div>
 
-  <Carousel
-    autoPlay
-    infiniteLoop
-    showThumbs={false}
-    showStatus={false}
-    interval={5000}
-    swipeable
-    emulateTouch
-  >
-    {/* Slide 1 */}
-    <div
-      className="relative h-[600px] bg-cover bg-center"
-      style={{ backgroundImage: "url('/images/pharmacy1.jpg')" }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/40 flex flex-col items-center justify-center text-center text-white px-6">
-        <h2 className="text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[#B57C36] to-yellow-400 bg-clip-text text-transparent animate-fadeIn">
-          Streamline Your Pharmacy Operations
-        </h2>
-        <p className="text-lg md:text-xl max-w-2xl mb-6 animate-slideUp">
-          Manage inventory, sales, and billing seamlessly with PharmaLink POS.
-        </p>
-        <button
-          onClick={() => navigate("/admin/login")}
-          className="bg-[#B57C36] text-white font-semibold py-3 px-10 rounded-full shadow-xl 
-                     transform hover:scale-105 transition-all duration-300 animate-pulseGlow"
+        <Carousel
+          autoPlay
+          infiniteLoop
+          showThumbs={false}
+          showStatus={false}
+          interval={5000}
+          swipeable
+          emulateTouch
         >
-          Get Started
-        </button>
-      </div>
-    </div>
+          {/* Slide 1 */}
+          <div
+            className="relative h-[600px] bg-cover bg-center"
+            style={{ backgroundImage: "url('/images/pharmacy1.jpg')" }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/40 flex flex-col items-center justify-center text-center text-white px-6">
+              <h2 className="text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[#B57C36] to-yellow-400 bg-clip-text text-transparent animate-fadeIn">
+                Streamline Your Pharmacy Operations
+              </h2>
+              <p className="text-lg md:text-xl max-w-2xl mb-6 animate-slideUp">
+                Manage inventory, sales, and billing seamlessly with PharmaLink
+                POS.
+              </p>
+              <button
+                onClick={() => navigate("/admin/login")}
+                className="bg-[#B57C36] text-white font-semibold py-3 px-10 rounded-full shadow-xl 
+                         transform hover:scale-105 transition-all duration-300 animate-pulseGlow"
+              >
+                Get Started
+              </button>
+            </div>
+          </div>
 
-    {/* Slide 2 */}
-    <div
-      className="relative h-[600px] bg-cover bg-center"
-      style={{ backgroundImage: "url('/images/pharmacy2.jpg')" }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/40 flex flex-col items-center justify-center text-center text-white px-6">
-        <h2 className="text-5xl md:text-6xl font-extrabold mb-4 animate-fadeIn">
-          Track Stock in Real Time
-        </h2>
-        <p className="text-lg md:text-xl max-w-2xl mb-6 animate-slideUp">
-          Stay ahead with smart alerts for low stock and expiry dates.
+          {/* Slide 2 */}
+          <div
+            className="relative h-[600px] bg-cover bg-center"
+            style={{ backgroundImage: "url('/images/pharmacy2.jpg')" }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/40 flex flex-col items-center justify-center text-center text-white px-6">
+              <h2 className="text-5xl md:text-6xl font-extrabold mb-4 animate-fadeIn">
+                Track Stock in Real Time
+              </h2>
+              <p className="text-lg md:text-xl max-w-2xl mb-6 animate-slideUp">
+                Stay ahead with smart alerts for low stock and expiry dates.
+              </p>
+            </div>
+          </div>
+
+          {/* Slide 3 */}
+          <div
+            className="relative h-[600px] bg-cover bg-center"
+            style={{ backgroundImage: "url('/images/pharmacy3.jpg')" }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/40 flex flex-col items-center justify-center text-center text-white px-6">
+              <h2 className="text-5xl md:text-6xl font-extrabold mb-4 animate-fadeIn">
+                Simplify Sales & Billing
+              </h2>
+              <p className="text-lg md:text-xl max-w-2xl mb-6 animate-slideUp">
+                Fast, accurate transactions with discounts and VAT handled
+                automatically.
+              </p>
+            </div>
+          </div>
+        </Carousel>
+      </section>
+
+      {/* About Us Section (no image, clean centered text) */}
+      <section className="py-20 px-6 max-w-4xl mx-auto text-center">
+        <h2 className="text-4xl font-bold text-[#B57C36] mb-6">About Us</h2>
+        <p className="text-gray-700 text-lg leading-relaxed">
+          PharmaLink POS was founded in 2025 with a bold vision: to
+          revolutionize how chemists and pharmacies manage sales through smart
+          automation. We provide a powerful point‑of‑sale solution that
+          simplifies inventory tracking, branch management, and customer
+          service, all while ensuring compliance and accuracy. More than just
+          software, PharmaLink POS is a growth partner — helping pharmacies
+          embrace digital transformation, boost efficiency, and deliver
+          exceptional care.
         </p>
-      </div>
-    </div>
-
-    {/* Slide 3 */}
-    <div
-      className="relative h-[600px] bg-cover bg-center"
-      style={{ backgroundImage: "url('/images/pharmacy3.jpg')" }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/40 flex flex-col items-center justify-center text-center text-white px-6">
-        <h2 className="text-5xl md:text-6xl font-extrabold mb-4 animate-fadeIn">
-          Simplify Sales & Billing
-        </h2>
-        <p className="text-lg md:text-xl max-w-2xl mb-6 animate-slideUp">
-          Fast, accurate transactions with discounts and VAT handled automatically.
-        </p>
-      </div>
-    </div>
-  </Carousel>
-</section>
-
-
-
-      {/* About Us Section */}
-      <section className="py-20 px-6 max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
-        <div className="md:w-1/2">
-          <img
-            src="/images/about-us.jpg"
-            alt="PharmaLink team"
-            className="rounded-xl shadow-2xl object-cover w-full h-[350px]"
-          />
-        </div>
-        <div className="md:w-1/2 text-center md:text-left">
-          <h2 className="text-4xl font-bold text-[#B57C36] mb-6">About Us</h2>
-          <p className="text-gray-700 text-lg leading-relaxed">
-            PharmaLink POS was founded in 2025 with a bold vision: to
-            revolutionize how chemists and pharmacies manage sales through smart
-            automation. We provide a powerful point‑of‑sale solution that
-            simplifies inventory tracking, branch management, and customer
-            service, all while ensuring compliance and accuracy. More than just
-            software, PharmaLink POS is a growth partner — helping pharmacies
-            embrace digital transformation, boost efficiency, and deliver
-            exceptional care.
-          </p>
-        </div>
       </section>
 
       {/* Features Section */}

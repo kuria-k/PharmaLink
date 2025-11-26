@@ -43,7 +43,7 @@ const CashierSidebar = () => {
     { label: "Pending Payments", path: "/cashier/payments/pending" },
     { label: "Confirm Payment", path: "/cashier/payments/confirm" },
     { label: "M-Pesa STK", path: "/cashier/payments/mpesa" },
-    { label: "Reports", path: "/cashier/reports" },
+    // { label: "Reports", path: "/cashier/reports" },
   ];
 
   return (
@@ -97,7 +97,7 @@ const CashierSidebar = () => {
 
         {/* Bottom section: User info */}
         {user && (
-          <div className="mt-70 bg-[#B57C36]/90 text-white rounded-lg p-4 shadow-lg flex items-center space-x-3">
+          <div className="mt-80 bg-[#B57C36]/90 text-white rounded-lg p-4 shadow-lg flex items-center space-x-3">
             <div className="bg-white/20 rounded-full p-2">
               <FiUser size={24} />
             </div>
