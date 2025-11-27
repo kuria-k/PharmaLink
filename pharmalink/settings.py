@@ -162,9 +162,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 # DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# # INSTALLED_APPS += ['corsheaders']
-# # MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware'] + MIDDLEWARE
-# # CORS_ALLOW_ALL_ORIGINS = True
+# INSTALLED_APPS += ['corsheaders']
+# MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware'] + MIDDLEWARE
+# CORS_ALLOW_ALL_ORIGINS = True
 
 from pathlib import Path
 import os
@@ -175,7 +175,7 @@ SECRET_KEY = 'django-insecure-i#_zmo&a=r-n5&$ph_rvb$d&5%y*_tq28uy&lrmsuz-37)6w7m
 
 DEBUG = False
 
-ALLOWED_HOSTS = ["*"]  # or ["pharmalink.onrender.com"]
+ALLOWED_HOSTS = ["pharmalink-frontend.onrender.com", "pharmalink-u866.onrender.com"]  
 
 # ---------------- Installed apps ----------------
 INSTALLED_APPS = [
@@ -219,32 +219,33 @@ MIDDLEWARE = [
 ]
 
 # ---------------- CORS Settings ----------------
-CORS_ALLOWED_ORIGINS = [
-    "https://pharmalink-frontend.onrender.com",  
-    "http://localhost:3000",                     
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "https://pharmalink-frontend.onrender.com",  
+#     "http://localhost:3000",                     
+# ]
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Allow all methods and headers for safety
-CORS_ALLOW_METHODS = [
-    "DELETE",
-    "GET",
-    "OPTIONS",
-    "PATCH",
-    "POST",
-    "PUT",
-]
+# CORS_ALLOW_METHODS = [
+#     "DELETE",
+#     "GET",
+#     "OPTIONS",
+#     "PATCH",
+#     "POST",
+#     "PUT",
+# ]
 
-CORS_ALLOW_HEADERS = [
-    "accept",
-    "authorization",
-    "content-type",
-    "origin",
-    "user-agent",
-    "x-csrftoken",
-    "x-requested-with",
-]
-CORS_ALLOW_CREDENTIALS =True
-# "SUPPORTS_CREDENTIALS" = True
+# CORS_ALLOW_HEADERS = [
+#     "accept",
+#     "authorization",
+#     "content-type",
+#     "origin",
+#     "user-agent",
+#     "x-csrftoken",
+#     "x-requested-with",
+# ]
+
+
 
 # ---------------- URLs ----------------
 ROOT_URLCONF = "pharmalink.urls"
