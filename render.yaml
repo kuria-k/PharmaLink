@@ -16,7 +16,7 @@ services:
   - type: static_site
     name: pharmalink-frontend
     rootDir: front-end
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && npm run build && echo '/*    /index.html   200' > dist/_redirects
     publishPath: dist
     routes:
       - type: rewrite
