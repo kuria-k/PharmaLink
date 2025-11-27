@@ -219,31 +219,31 @@ MIDDLEWARE = [
 ]
 
 # ---------------- CORS Settings ----------------
-# CORS_ALLOWED_ORIGINS = [
-#     "https://pharmalink-frontend.onrender.com",  
-#     "http://localhost:3000",                     
-# ]
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://pharmalink-frontend.onrender.com",  
+    "http://localhost:3000",                     
+]
+# CORS_ALLOW_ALL_ORIGINS = True
 
 # Allow all methods and headers for safety
-# CORS_ALLOW_METHODS = [
-#     "DELETE",
-#     "GET",
-#     "OPTIONS",
-#     "PATCH",
-#     "POST",
-#     "PUT",
-# ]
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
 
-# CORS_ALLOW_HEADERS = [
-#     "accept",
-#     "authorization",
-#     "content-type",
-#     "origin",
-#     "user-agent",
-#     "x-csrftoken",
-#     "x-requested-with",
-# ]
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "authorization",
+    "content-type",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 
 
