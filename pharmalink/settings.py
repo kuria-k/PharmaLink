@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-i#_zmo&a=r-n5&$ph_rvb$d&5%y*_tq28uy&lrmsuz-37)6w7m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["https://pharmalink-84jl.onrender.com"]
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
