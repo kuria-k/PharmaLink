@@ -220,8 +220,8 @@ MIDDLEWARE = [
 
 # ---------------- CORS Settings ----------------
 CORS_ALLOWED_ORIGINS = [
-    "https://pharmalink-frontend.onrender.com",  # your deployed React frontend
-    "http://localhost:3000",                     # local dev
+    "https://pharmalink-frontend.onrender.com",  
+    "http://localhost:3000",                     
 ]
 
 # Allow all methods and headers for safety
