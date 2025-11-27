@@ -70,10 +70,7 @@ MIDDLEWARE = [
 
 
 # Allow only your deployed React frontend
-CORS_ALLOWED_ORIGINS = [
-    "https://pharmalink-frontend.onrender.com",
-    "http://localhost:3000",  
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 ROOT_URLCONF = 'pharmalink.urls'
