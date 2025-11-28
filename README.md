@@ -42,5 +42,5 @@ It streamlines operations by integrating **Admin**, **Sales**, **Cashier**, and 
 
 1. Clone the repository:
    bash
-   git clone[ https://github.com/yourusername/pharmalink.git](https://github.com/kuria-k/PharmaLink.git)
+   git clone(https://github.com/kuria-k/PharmaLink.git)
    cd pharmalink
