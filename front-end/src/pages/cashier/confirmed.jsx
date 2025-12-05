@@ -3,10 +3,18 @@ import { getPayments } from "../../utils/api";
 
 const ConfirmedPayments = () => {
   const [payments, setPayments] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // number of rows per page
 
   useEffect(() => {
     getPayments("paid").then((res) => setPayments(res.data));
   }, []);
+
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentPayments = payments.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(payments.length / itemsPerPage);
 
   return (
     <div className="p-8 bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3] min-h-screen">
@@ -26,14 +34,14 @@ const ConfirmedPayments = () => {
             </tr>
           </thead>
           <tbody>
-            {payments.length === 0 ? (
+            {currentPayments.length === 0 ? (
               <tr>
                 <td colSpan="7" className="text-center p-6 text-gray-500">
                   No confirmed payments found.
                 </td>
               </tr>
             ) : (
-              payments.map((p, idx) => (
+              currentPayments.map((p, idx) => (
                 <tr
                   key={p.id}
                   className={`${
@@ -53,9 +61,33 @@ const ConfirmedPayments = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination controls */}
+      {payments.length > itemsPerPage && (
+        <div className="flex justify-center items-center mt-6 space-x-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1 rounded bg-[#B57C36]/20 hover:bg-[#B57C36]/40 disabled:opacity-50"
+          >
+            Prev
+          </button>
+          <span className="px-2 text-sm font-medium">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 rounded bg-[#B57C36]/20 hover:bg-[#B57C36]/40 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
 export default ConfirmedPayments;
+
 

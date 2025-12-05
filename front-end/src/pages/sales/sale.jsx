@@ -4,6 +4,7 @@ import {
   createSale,
   getCustomers,
   getSales,
+  authorizeSale,
 } from "../../utils/api";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -52,7 +53,15 @@ const PosSaleDashboard = () => {
   const [filteredSales, setFilteredSales] = useState([]);
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [authUsername, setAuthUsername] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState("");
+  const [postedById, setPostedById] = useState(null);
+
   const navigate = useNavigate();
+  // const postedById = currentUser?.id;
 
   useEffect(() => {
     getProducts()
@@ -141,93 +150,279 @@ const PosSaleDashboard = () => {
   //     console.error(err);
   //   }
   // };
-  const handleSaveSale = async () => {
+  // Fetch sales once when component mounts
+  useEffect(() => {
+    fetchSales();
+  }, []);
+
+  // Fetch sales function
+  const fetchSales = async () => {
     try {
-      const payload = {
-        customer_name: clientName || "Walk-in",
-        client_number: clientNumber || "",
-        total_amount: Number(totals.nett) || 0,
-        item_inputs: items
-          .filter((it) => it.product && it.price)
-          .map((it) => {
-            const quantity = Number(it.quantity) || 0;
-            const price = Number(it.price) || 0;
-            const discountRate = Number(it.discount) || 0; // percentage
-            const vatRate = 16; // always 16%
-
-            return {
-              product: it.product,
-              quantity,
-              unit: it.unit,
-              price,
-              discount: discountRate,
-              vat: vatRate,
-            };
-          }),
-      };
-
-      const response = await createSale(payload);
-      console.log("Sale response:", response);
-
-      // Save the posted sale into state
-      setSelectedInvoice(response.data);
-
-      toast.success(
-        `Sale posted successfully! Invoice: ${
-          response.data.invoice_number
-        }, Total: ${formatKES(response.data.total_amount)}`,
-        {
-          style: {
-            background: "#22c55e",
-            color: "#064e3b",
-            fontWeight: "bold",
-          },
-        }
-      );
-
-      setShowConfirm(false);
-      setShowInvoice(true); // open modal
-      setItems([]); // reset cart
+      const res = await getSales();
+      setSales(res.data);
+      setFilteredSales(res.data);
+      console.log(res.data);
     } catch (err) {
-      console.error("Sale post error:", err.response?.data || err.message);
-      toast.error("Failed to post sale");
+      console.error("Error fetching sales:", err);
     }
-
-    useEffect(() => {
-      fetchSales();
-    }, []);
-
-    const fetchSales = async () => {
-      try {
-        const res = await getSales();
-        setSales(res.data);
-        console.log(res.data);
-        setFilteredSales(res.data);
-      } catch (err) {
-        console.error("Error fetching sales:", err);
-      }
-    };
-
-    const handleFilter = () => {
-      if (!fromDate || !toDate) {
-        setFilteredSales(sales);
-        return;
-      }
-      const from = new Date(fromDate);
-      const to = new Date(toDate);
-      const filtered = sales.filter((s) => {
-        const saleDate = new Date(s.created_at);
-        return saleDate >= from && saleDate <= to;
-      });
-      setFilteredSales(filtered);
-    };
   };
 
+  // Filter sales by date
+  const handleFilter = () => {
+    if (!fromDate || !toDate) {
+      setFilteredSales(sales);
+      return;
+    }
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
+    const filtered = sales.filter((s) => {
+      const saleDate = new Date(s.created_at);
+      return saleDate >= from && saleDate <= to;
+    });
+    setFilteredSales(filtered);
+  };
+
+  // Save sale after authorization
+//  const handleSaveSale = async (postedByUsername) => {
+//   try {
+//     const branchId = Number(localStorage.getItem("selectedBranch"));
+
+// const payload = {
+//   customer_name: clientName?.trim() || "Walk-in",
+//   client_number: clientNumber?.trim() || "",
+//   posted_by_username: postedByUsername,   // e.g. "JIMMY"
+//   ...(branchId ? { branch: Number(branchId) } : {}),
+//   item_inputs: items.map(it => ({
+//     product: it.product,                        // numeric ID directly
+//     quantity: Number(it.quantity) || 1,         // must be > 0
+//     unit: it.unit || "pcs",
+//     price: Number(Number(it.price || 0).toFixed(2)), // must be set
+//     discount: Number(it.discount) || 0,
+//     vat: 16,
+//   })),
+// };
+
+
+
+
+
+//     console.log("Items in cart:", items);
+// console.log("Payload being sent:", payload);
+
+
+//     const response = await createSale(payload);
+//     console.log("Sale response:", response);
+
+//     setSelectedInvoice(response.data);
+
+//     toast.success(
+//       `Sale posted successfully! Invoice: ${
+//         response.data.invoice_number
+//       }, Total: ${formatKES(response.data.total_amount)}`,
+//       {
+//         style: {
+//           background: "#22c55e",
+//           color: "#064e3b",
+//           fontWeight: "bold",
+//         },
+//       }
+//     );
+
+//     setShowConfirm(false);
+//     setShowInvoice(true);
+//     setItems([]);
+//     fetchSales(); // refresh sales after posting
+//   } catch (err) {
+//     console.error("Sale post error:", err.response?.data || err.message);
+//     toast.error("Failed to post sale");
+//   }
+// };
+
+const handleSaveSale = async (postedByUsername) => {
+  try {
+    console.log("=== SALE DEBUG START ===");
+    console.log("handleSaveSale called with username:", postedByUsername);
+    console.log("Username type:", typeof postedByUsername);
+    console.log("Username value:", JSON.stringify(postedByUsername));
+    
+    // Validate items exist
+    if (!items || items.length === 0) {
+      toast.error("Cannot post sale: No items in cart");
+      return;
+    }
+
+    // Validate username - handle null/undefined
+    if (postedByUsername === null || postedByUsername === undefined) {
+      toast.error("Posted by username is required (received null/undefined)");
+      console.error("Username is null or undefined!");
+      return;
+    }
+
+    // Convert to string if needed and trim
+    const username = String(postedByUsername).trim();
+    
+    if (username === "" || username === "null" || username === "undefined") {
+      toast.error("Posted by username must be a valid non-empty string");
+      console.error("Invalid username after conversion:", username);
+      return;
+    }
+
+    console.log("Final username being used:", username);
+
+    const branchId = Number(localStorage.getItem("selectedBranch"));
+
+    // Validate and prepare items
+    const validatedItems = items.map((it, index) => {
+      // Validate product ID
+      const productId = Number(it.product);
+      if (!productId || isNaN(productId)) {
+        throw new Error(`Item ${index + 1}: Invalid product ID`);
+      }
+
+      // Validate quantity
+      const quantity = Number(it.quantity);
+      if (!quantity || quantity <= 0 || isNaN(quantity)) {
+        throw new Error(`Item ${index + 1}: Quantity must be greater than 0`);
+      }
+
+      // Validate price
+      const price = Number(it.price);
+      if (isNaN(price)) {
+        throw new Error(`Item ${index + 1}: Invalid price`);
+      }
+      if (price < 0) {
+        throw new Error(`Item ${index + 1}: Price cannot be negative`);
+      }
+
+      // Validate discount
+      const discount = Number(it.discount || 0);
+      if (isNaN(discount) || discount < 0) {
+        throw new Error(`Item ${index + 1}: Invalid discount`);
+      }
+
+      // Validate VAT
+      const vat = Number(it.vat || 16);
+      if (isNaN(vat) || vat < 0) {
+        throw new Error(`Item ${index + 1}: Invalid VAT`);
+      }
+
+      return {
+        product: productId,
+        quantity: quantity,
+        unit: String(it.unit || "pcs"),
+        price: parseFloat(price.toFixed(2)),
+        discount: parseFloat(discount.toFixed(2)),
+        vat: parseFloat(vat.toFixed(2)),
+      };
+    });
+
+    const payload = {
+      customer_name: clientName?.trim() || "Walk-in",
+      client_number: clientNumber?.trim() || "",
+      posted_by_username: username, // Use the validated username
+      item_inputs: validatedItems,
+    };
+
+    // Only add branch if it exists
+    if (branchId && !isNaN(branchId)) {
+      payload.branch = branchId;
+    }
+
+    console.log("Items in cart:", items);
+    console.log("Validated payload:", payload);
+
+    const response = await createSale(payload);
+    console.log("Sale response:", response);
+
+    setSelectedInvoice(response.data);
+
+    toast.success(
+      `Sale posted successfully! Invoice: ${
+        response.data.invoice_number
+      }, Total: ${formatKES(response.data.total_amount)}`,
+      {
+        style: {
+          background: "#22c55e",
+          color: "#064e3b",
+          fontWeight: "bold",
+        },
+      }
+    );
+
+    setShowConfirm(false);
+    setShowInvoice(true);
+    setItems([]);
+    setClientName("");
+    setClientNumber("");
+    fetchSales(); // refresh sales after posting
+  } catch (err) {
+    console.error("Sale post error:", err);
+    console.error("Backend error details:", err.response?.data);
+    
+    // Handle validation errors
+    if (err.message && !err.response) {
+      toast.error(err.message);
+    } else if (err.response?.data) {
+      const errorData = err.response.data;
+      
+      // Handle different error formats
+      if (typeof errorData === 'string') {
+        toast.error(errorData);
+      } else if (errorData.error) {
+        toast.error(errorData.error);
+      } else if (errorData.detail) {
+        toast.error(errorData.detail);
+      } else if (errorData.item_inputs) {
+        toast.error(`Item validation error: ${JSON.stringify(errorData.item_inputs)}`);
+      } else {
+        toast.error(JSON.stringify(errorData));
+      }
+    } else {
+      toast.error("Failed to post sale.");
+    }
+  }
+};
+
+  // Authorization before saving sale
+  const handleAuthorize = async () => {
+  setAuthError("");
+  setAuthLoading(true);
+
+  try {
+    const data = await authorizeSale(authUsername, authPassword);
+    
+    console.log("=== AUTH DEBUG ===");
+    console.log("Auth response data:", data);
+    console.log("data.success:", data.success);
+    console.log("data.username:", data.username);
+    console.log("data.username type:", typeof data.username);
+
+    if (!data.success) {
+      setAuthError(data.message || "Invalid credentials");
+      return;
+    }
+
+    await handleSaveSale(data.username);
+    setShowConfirm(false);
+  } catch (err) {
+    console.error("Authorization error:", err);
+    setAuthError("Error verifying credentials.");
+  } finally {
+    setAuthLoading(false);
+  }
+};
+
   return (
-    <section className="bg-gray-50 rounded-lg border shadow-md p-6">
-      <div className="grid grid-cols-4 gap-6">
+    <section
+      className="bg-gray-50 rounded-lg border shadow-md 
+                    p-4 sm:p-6 md:p-8 lg:p-12 
+                    w-full max-w-7xl mx-auto 
+                    text-xs sm:text-sm md:text-base lg:text-m"
+    >
+      {/* <div className="grid grid-cols-4 gap-6"> */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {/* Left Side: Section 1 + Section 2 */}
-        <div className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3 space-y-6 sm:space-y-8 lg:space-y-10" >
+        <div className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3 space-y-6 sm:space-y-8 lg:space-y-10">
           <div className="bg-white rounded-lg border p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-[#B57C36] mb-6">
               Sale Details
@@ -423,10 +618,10 @@ const PosSaleDashboard = () => {
                                   drug.selling_price_per_pack ??
                                   drug.price_per_pack,
 
-                                // ✅ Always default VAT to 16%
+                                // Always default VAT to 16%
                                 vat: 16,
 
-                                // ✅ Default discount to 0
+                                //  Default discount to 0
                                 discount: 0,
                               })
                             }
@@ -908,7 +1103,7 @@ const PosSaleDashboard = () => {
           </div>
         </div>
         {/* Action buttons */}
-        <div className="mt-4 flex gap-3">
+        <div className="mt-4 flex flex-col sm:flex-row gap-3 sm:gap-6">
           <button
             className="bg-[#B57C36] text-white px-4 py-2 rounded shadow"
             onClick={() => setShowConfirm(true)}
@@ -923,27 +1118,117 @@ const PosSaleDashboard = () => {
           </button>
         </div>
 
-        {/* Confirm Modal */}
+        {/* Sale Authorization Modal */}
         {showConfirm && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-              <h2 className="text-lg font-semibold text-[#B57C36] mb-4">
-                Confirm Sale Posting
+          <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+            <div className="bg-white rounded-xl shadow-2xl p-8 w-[420px]">
+              {/* Header */}
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                Sale Authorization
               </h2>
-              <p className="text-sm mb-6">
-                Are you sure you want to post this sale?
+              <p className="text-sm text-gray-600 mb-6">
+                Enter your credentials to authorize this sale posting.
               </p>
+
+              {/* Username */}
+              <div className="mb-5">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter username"
+                  className="border border-gray-300 px-3 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#B57C36]"
+                  value={authUsername}
+                  onChange={(e) => setAuthUsername(e.target.value)}
+                />
+              </div>
+
+              {/* Password with toggle */}
+              <div className="mb-5 relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password"
+                  className="border border-gray-300 px-3 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#B57C36] pr-10"
+                  value={authPassword}
+                  onChange={(e) => setAuthPassword(e.target.value)}
+                />
+                {/* Eye Icon */}
+                <button
+                  type="button"
+                  className="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 
+                   0-1.07.168-2.1.475-3.075m3.1 3.1A6.978 6.978 0 005 9c0-3.866 
+                   3.134-7 7-7 1.07 0 2.1.168 3.075.475m3.1 3.1A6.978 6.978 0 
+                   0019 9c0 3.866-3.134 7-7 7-1.07 0-2.1-.168-3.075-.475"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 
+                   8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 
+                   7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
+
+              {/* Error Message */}
+              {authError && (
+                <p className="text-red-500 text-sm mb-4">{authError}</p>
+              )}
+
+              {/* Actions */}
               <div className="flex justify-end gap-3">
                 <button
-                  className="bg-gray-300 px-4 py-2 rounded"
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md transition"
                   onClick={() => setShowConfirm(false)}
                 >
                   Cancel
                 </button>
+
                 <button
-                  className="bg-[#B57C36] text-white px-4 py-2 rounded"
-                  onClick={handleSaveSale}
+                  className="bg-[#B57C36] hover:bg-[#9c682d] text-white px-4 py-2 rounded-md flex items-center gap-2 transition disabled:opacity-50"
+                  onClick={handleAuthorize}
+                  disabled={authLoading}
                 >
+                  {authLoading && (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  )}
                   Confirm
                 </button>
               </div>

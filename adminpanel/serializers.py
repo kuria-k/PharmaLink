@@ -175,7 +175,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email', 'password']
         extra_kwargs = {
-            'username': {'required': True},  # required for create
+            'username': {'required': True},  
             'email': {'required': False},
         }
 
@@ -194,7 +194,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    # ✅ Nested user serializer (writable for create/update)
+    # Nested user serializer (writable for create/update)
     user = UserSerializer()
 
     branches = BranchSerializer(many=True, read_only=True)

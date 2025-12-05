@@ -78,6 +78,8 @@ from .views import (
     ChangePasswordView,
     ProductListCreateView,
     ProductDetailView,
+    FirstLoginChangePasswordView,
+    ResetPasswordRequestView,
     login_view
 )
 
@@ -102,4 +104,6 @@ urlpatterns = [
 
     # Change password
     path('change-password/', ChangePasswordView.as_view(), name='change-password'),
+    path('first-login-change-password/', FirstLoginChangePasswordView.as_view(), name='first-login-change-password'),
+    path('reset-password-request/', ResetPasswordRequestView.as_view(), name='reset-password-request'),
 ]

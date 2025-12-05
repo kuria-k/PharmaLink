@@ -141,6 +141,7 @@
 from django.db import models
 from datetime import datetime
 from decimal import Decimal
+from django.contrib.auth.models import User   # ✅ import User
 from inventory.models import Product
 from adminpanel.models import Branch
 
@@ -181,7 +182,13 @@ class Sale(models.Model):
     invoice_number = models.CharField(max_length=50, unique=True, blank=True)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
     created_at = models.DateTimeField(auto_now_add=True)
-    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, related_name="sales", null=True, blank=True)
+
+    branch = models.ForeignKey(
+        Branch, on_delete=models.SET_NULL, related_name="sales", null=True, blank=True
+    )
+
+    # Track who posted the sale
+    posted_by = models.CharField(max_length=150, blank=True, default="")
 
     # Payment tracking
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, blank=True, null=True)
@@ -206,7 +213,8 @@ class Sale(models.Model):
 
     def __str__(self):
         branch_name = self.branch.name if self.branch else "No Branch"
-        return f"{self.invoice_number} - {self.customer_name} ({branch_name})"
+        user_name = self.posted_by.username if self.posted_by else "Unknown User"
+        return f"{self.invoice_number} - {self.customer_name} ({branch_name}) by {user_name}"
 
 
 class SaleItem(models.Model):
@@ -228,5 +236,6 @@ class SaleItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name} ({self.get_unit_display()})"
+
 
 

@@ -13,7 +13,8 @@ from .views import (
     SaleDetailView,
     SaleInvoiceView,
     CustomerListCreateView,   
-    CustomerDetailView        
+    CustomerDetailView, 
+    AuthorizeSaleView
 )
 
 urlpatterns = [
@@ -21,6 +22,7 @@ urlpatterns = [
     path('', SaleListCreateView.as_view(), name='sale-list-create'),
     path('<int:pk>/', SaleDetailView.as_view(), name='sale-detail'),
     path('<int:pk>/invoice/', SaleInvoiceView.as_view(), name='sale-invoice'),
+    path("authorize-sale/", AuthorizeSaleView.as_view(), name="authorize-sale"),
 
     # Customer endpoints
     path('customers/', CustomerListCreateView.as_view(), name='customer-list-create'),

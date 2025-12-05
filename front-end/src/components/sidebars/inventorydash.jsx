@@ -1,49 +1,66 @@
-// import React from 'react';
-// import { Link } from 'react-router-dom';
-
-// const InventorySidebar = () => (
-//   <div className="w-64 h-screen fixed bg-white/30 backdrop-blur-md border-r border-[#B57C36] text-black p-6 shadow-xl">
-//     <h2 className="text-xl font-bold mb-8 text-[#B57C36]">Inventory Panel</h2>
-//     <ul className="space-y-4">
-//       <li><Link to="/inventory/dashboard" className="hover:text-[#B57C36] font-medium">Dashboard</Link></li>
-//       <li><Link to="/inventory/products" className="hover:text-[#B57C36] font-medium">Products</Link></li>
-//       <li><Link to="/inventory/stock" className="hover:text-[#B57C36] font-medium">Stock Levels</Link></li>
-//       <li><Link to="/inventory/reorders" className="hover:text-[#B57C36] font-medium">Reorder Alerts</Link></li>
-//       <li><Link to="/inventory/suppliers" className="hover:text-[#B57C36] font-medium">Suppliers</Link></li>
-//       <li><Link to="/inventory/logs" className="hover:text-[#B57C36] font-medium">Inventory Logs</Link></li>
-//     </ul>
-//   </div>
-// );
-
-// export default InventorySidebar;
-
-// components/sidebars/InventorySidebar.jsx
-// components/sidebars/InventorySidebar.jsx
+/// components/sidebars/InventorySidebar.jsx
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { FiMenu, FiX, FiUser } from "react-icons/fi";
+import { FiMenu, FiX, FiUser, FiMapPin } from "react-icons/fi";
 
 const InventorySidebar = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [user, setUser] = useState(null);
+  const [branch, setBranch] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Get tabId for this browser tab
+  // Ensure tabId exists for this browser tab
+  useEffect(() => {
+    if (!sessionStorage.getItem("tabId")) {
+      sessionStorage.setItem("tabId", Date.now().toString());
+    }
+  }, []);
+
   const tabId = sessionStorage.getItem("tabId");
 
+  // Load user from localStorage and verify authentication
   useEffect(() => {
-    if (tabId) {
-      const storedUser = localStorage.getItem(`user-${tabId}`);
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-        } catch (err) {
-          console.error("Error parsing user:", err);
-        }
-      }
+    if (!tabId) return;
+
+    const storedRole = localStorage.getItem(`role-${tabId}`);
+    const storedUser = localStorage.getItem(`user-${tabId}`);
+    const storedAccessToken = localStorage.getItem(`accessToken-${tabId}`);
+    const storedBranch = localStorage.getItem(`selectedBranch-${tabId}`);
+
+    // Check if user is logged in
+    if (!storedRole || !storedUser || !storedAccessToken) {
+      navigate("/login");
+      return;
     }
-  }, [tabId]);
+
+    // Verify user has correct role for this sidebar
+    if (storedRole !== "inventory") {
+      navigate(`/${storedRole}/dashboard`);
+      return;
+    }
+
+    // Parse and set user data
+    try {
+      const userData = JSON.parse(storedUser);
+      setUser(userData);
+    } catch (err) {
+      console.error("Error parsing user:", err);
+      navigate("/login");
+      return;
+    }
+
+    // Parse branch (could be stored as object or string)
+    try {
+      const branchData = JSON.parse(storedBranch);
+      setBranch(branchData);
+    } catch {
+      setBranch(storedBranch); // fallback if stored as string
+    }
+
+    setLoading(false);
+  }, [tabId, navigate]);
 
   const handleLogout = () => {
     if (tabId) {
@@ -52,7 +69,9 @@ const InventorySidebar = () => {
       localStorage.removeItem(`accessToken-${tabId}`);
       localStorage.removeItem(`refreshToken-${tabId}`);
       localStorage.removeItem(`branches-${tabId}`);
+      localStorage.removeItem(`selectedBranch-${tabId}`);
     }
+    setShowLogoutModal(false);
     navigate("/login");
   };
 
@@ -65,6 +84,16 @@ const InventorySidebar = () => {
     { label: "Add Inventory", path: "/inventory/add" },
     { label: "Suppliers", path: "/inventory/suppliers" },
   ];
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="fixed top-0 left-0 h-screen w-64 bg-white/30 backdrop-blur-md border-r border-[#B57C36] flex items-center justify-center">
+        <div className="text-[#B57C36]">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Mobile toggle button */}
@@ -116,21 +145,27 @@ const InventorySidebar = () => {
           </ul>
         </div>
 
-        {/* Bottom section: User info */}
+        {/* Bottom section: User info + branch */}
         {user && (
-          <div className="mt-40 bg-[#B57C36]/90 text-white rounded-lg p-4 shadow-lg flex items-center space-x-3">
-            <div className="bg-white/20 rounded-full p-2">
-              <FiUser size={24} />
+          <div className="mt-35 bg-[#B57C36]/90 text-white rounded-lg p-4 shadow-lg flex flex-col space-y-2">
+            <div className="flex items-center space-x-3">
+              <div className="bg-white/20 rounded-full p-2">
+                <FiUser size={24} />
+              </div>
+              <div>
+                <p className="font-semibold">{user.username}</p>
+                {user.role && <p className="text-xs opacity-90">Role: {user.role}</p>}
+                {user.email && <p className="text-xs opacity-90">{user.email}</p>}
+              </div>
             </div>
-            <div>
-              <p className="font-semibold">{user.username}</p>
-              {user.role && (
-                <p className="text-xs opacity-90">Role: {user.role}</p>
-              )}
-              {user.email && (
-                <p className="text-xs opacity-90">{user.email}</p>
-              )}
-            </div>
+            {branch && (
+              <div className="flex items-center space-x-2">
+                <FiMapPin size={20} />
+                <p className="text-sm font-medium">
+                  Branch: {branch?.name ? branch.name : branch}
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -167,5 +202,4 @@ const InventorySidebar = () => {
 };
 
 export default InventorySidebar;
-
 

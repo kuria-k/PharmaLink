@@ -1,7 +1,7 @@
-// components/sidebars/SalesSidebar.jsx
+/// components/sidebars/SalesSidebar.jsx
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { FiMenu, FiX, FiUser } from "react-icons/fi";
+import { FiMenu, FiX, FiUser, FiMapPin } from "react-icons/fi";
 
 const SalesSidebar = () => {
   const navigate = useNavigate();
@@ -9,22 +9,59 @@ const SalesSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [user, setUser] = useState(null);
+  const [branch, setBranch] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Get tabId for this browser tab
+  // Ensure tabId exists for this browser tab
+  useEffect(() => {
+    if (!sessionStorage.getItem("tabId")) {
+      sessionStorage.setItem("tabId", Date.now().toString());
+    }
+  }, []);
+
   const tabId = sessionStorage.getItem("tabId");
 
+  // Load user from localStorage and verify authentication
   useEffect(() => {
-    if (tabId) {
-      const storedUser = localStorage.getItem(`user-${tabId}`);
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-        } catch (err) {
-          console.error("Error parsing user:", err);
-        }
-      }
+    if (!tabId) return;
+
+    const storedRole = localStorage.getItem(`role-${tabId}`);
+    const storedUser = localStorage.getItem(`user-${tabId}`);
+    const storedAccessToken = localStorage.getItem(`accessToken-${tabId}`);
+    const storedBranch = localStorage.getItem(`selectedBranch-${tabId}`);
+
+    // Check if user is logged in
+    if (!storedRole || !storedUser || !storedAccessToken) {
+      navigate("/login");
+      return;
     }
-  }, [tabId]);
+
+    // Verify user has correct role for this sidebar
+    if (storedRole !== "sales") {
+      navigate(`/${storedRole}/dashboard`);
+      return;
+    }
+
+    // Parse and set user data
+    try {
+      const userData = JSON.parse(storedUser);
+      setUser(userData);
+    } catch (err) {
+      console.error("Error parsing user:", err);
+      navigate("/login");
+      return;
+    }
+
+    // Parse branch (could be stored as object or string)
+    try {
+      const branchData = JSON.parse(storedBranch);
+      setBranch(branchData);
+    } catch {
+      setBranch(storedBranch); // fallback if stored as string
+    }
+
+    setLoading(false);
+  }, [tabId, navigate]);
 
   const handleLogout = () => {
     if (tabId) {
@@ -33,17 +70,17 @@ const SalesSidebar = () => {
       localStorage.removeItem(`accessToken-${tabId}`);
       localStorage.removeItem(`refreshToken-${tabId}`);
       localStorage.removeItem(`branches-${tabId}`);
+      localStorage.removeItem(`selectedBranch-${tabId}`);
     }
+    setShowLogoutModal(false);
     navigate("/login");
   };
 
   // Sales-specific navigation items
   const navItems = [
     { label: "Dashboard", path: "/sales/dashboard" },
-    // We won’t show “New Sale” here, but we’ll keep it linked to Invoices
     { label: "Invoices", path: "/sales/invoices" },
     { label: "Customers", path: "/sales/customers" },
-    // { label: "Products", path: "/sales/products" },
     { label: "Reports", path: "/sales/reports" },
   ];
 
@@ -51,6 +88,15 @@ const SalesSidebar = () => {
   const isInvoicesActive =
     location.pathname.startsWith("/sales/invoices") ||
     location.pathname.startsWith("/sales/new");
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="fixed top-0 left-0 h-screen w-64 bg-white/30 backdrop-blur-md border-r border-[#B57C36] flex items-center justify-center">
+        <div className="text-[#B57C36]">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -105,17 +151,27 @@ const SalesSidebar = () => {
           </ul>
         </div>
 
-        {/* Bottom section: User info */}
+        {/* Bottom section: User info + branch */}
         {user && (
-          <div className="mt-80 bg-[#B57C36]/90 text-white rounded-lg p-4 shadow-lg flex items-center space-x-3">
-            <div className="bg-white/20 rounded-full p-2">
-              <FiUser size={24} />
+          <div className="mt-75 bg-[#B57C36]/90 text-white rounded-lg p-4 shadow-lg flex flex-col space-y-2">
+            <div className="flex items-center space-x-3">
+              <div className="bg-white/20 rounded-full p-2">
+                <FiUser size={24} />
+              </div>
+              <div>
+                <p className="font-semibold">{user.username}</p>
+                {user.role && <p className="text-xs opacity-90">Role: {user.role}</p>}
+                {user.email && <p className="text-xs opacity-90">{user.email}</p>}
+              </div>
             </div>
-            <div>
-              <p className="font-semibold">{user.username}</p>
-              {user.role && <p className="text-xs opacity-90">Role: {user.role}</p>}
-              {user.email && <p className="text-xs opacity-90">{user.email}</p>}
-            </div>
+            {branch && (
+              <div className="flex items-center space-x-2">
+                <FiMapPin size={20} />
+                <p className="text-sm font-medium">
+                  Branch: {branch?.name ? branch.name : branch}
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -150,6 +206,3 @@ const SalesSidebar = () => {
 };
 
 export default SalesSidebar;
-
-
-

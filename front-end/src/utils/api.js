@@ -261,7 +261,7 @@
 
 // const api = axios.create({
 //   // baseURL: "http://localhost:8000/api",
-//   baseURL: API_BASE_URL, 
+//   baseURL: API_BASE_URL,
 //   headers: {
 //     "Content-Type": "application/json",
 //   },
@@ -340,13 +340,13 @@
 // export const getDashboardStats = () =>
 //   api.get("cashier/dashboard/");
 
-
 // export default api;
 
 import axios from "axios";
 
 // Use environment variable first, fallback to localhost for dev
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 // Create axios instance
 const api = axios.create({
@@ -355,6 +355,39 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+// Attach token to every request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Refresh token if expired
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      const refresh = localStorage.getItem("refreshToken");
+      if (refresh) {
+        try {
+          const { access } = await refreshToken(refresh);
+          localStorage.setItem("accessToken", access);
+          api.defaults.headers.Authorization = `Bearer ${access}`;
+          return api(originalRequest);
+        } catch (err) {
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+)
 
 // ---------------- Branch endpoints ----------------
 export const getBranches = () => api.get("/branches/");
@@ -374,34 +407,56 @@ export const deleteProfile = (id) => api.delete(`/profiles/${id}/`);
 // ---------------- Product (Inventory) endpoints ----------------
 export const getProducts = () => api.get("/inventory/products/");
 export const createInventory = (data) => api.post("/inventory/products/", data);
-export const updateProduct = (id, data) => api.put(`/inventory/products/${id}/`, data);
+export const updateProduct = (id, data) =>
+  api.put(`/inventory/products/${id}/`, data);
 export const deleteProduct = (id) => api.delete(`/inventory/products/${id}/`);
 export const getInventorySummary = () => api.get("/inventory/summary/");
 
 // ---------------- Batch endpoints ----------------
 export const getBatches = () => api.get("/inventory/batches/");
 export const createBatch = (data) => api.post("/inventory/batches/", data);
-export const updateBatch = (id, data) => api.put(`/inventory/batches/${id}/`, data);
+export const updateBatch = (id, data) =>
+  api.put(`/inventory/batches/${id}/`, data);
 export const deleteBatch = (id) => api.delete(`/inventory/batches/${id}/`);
 
 // ---------------- Purchase order endpoints ----------------
 export const getPurchaseOrders = () => api.get("/inventory/purchase-orders/");
-export const createPurchaseOrder = (data) => api.post("/inventory/purchase-orders/", data);
-export const updatePurchaseOrder = (id, data) => api.put(`/inventory/purchase-orders/${id}/`, data);
-export const deletePurchaseOrder = (id) => api.delete(`/inventory/purchase-orders/${id}/`);
+export const createPurchaseOrder = (data) =>
+  api.post("/inventory/purchase-orders/", data);
+export const updatePurchaseOrder = (id, data) =>
+  api.put(`/inventory/purchase-orders/${id}/`, data);
+export const deletePurchaseOrder = (id) =>
+  api.delete(`/inventory/purchase-orders/${id}/`);
 
 // ---------------- Clients (Customers) endpoints ----------------
 export const getCustomers = () => api.get("/sales/customers/");
 export const createCustomer = (data) => api.post("/sales/customers/", data);
-export const updateCustomer = (id, data) => api.put(`/sales/customers/${id}/`, data);
+export const updateCustomer = (id, data) =>
+  api.put(`/sales/customers/${id}/`, data);
 export const deleteCustomer = (id) => api.delete(`/sales/customers/${id}/`);
 
 // ---------------- Sales endpoints ----------------
 export const getSales = () => api.get("/sales/");
-export const createSale = (data) => api.post("/sales/", data);
+// export const createSale = (data) => api.post("/sales/", data);
+export const createSale = (data) => {
+  // Get the currently selected branch ID from localStorage
+  const branchId = localStorage.getItem("selectedBranch");
+
+  return api.post("/sales/", {
+    ...data,
+    // Override branch if needed from localStorage (optional)
+    ...(branchId ? { branch: Number(branchId) } : {}),
+  });
+};
 export const updateSale = (id, data) => api.put(`/sales/${id}/`, data);
 export const deleteSale = (id) => api.delete(`/sales/${id}/`);
 export const getSaleInvoice = (id) => api.get(`/sales/${id}/`);
+export const authorizeSale = (username, password) =>
+  api
+    .post("/sales/authorize-sale/", { username, password })
+    .then((res) => res.data);
+
+
 
 // ---------------- Cashier (Payment) endpoints ----------------
 export const getPayments = (status = null) => {
@@ -413,9 +468,20 @@ export const getPayments = (status = null) => {
 };
 
 export const createPayment = (data) => api.post("cashier/payments/", data);
-export const initiateStkPush = (saleId) => api.post(`cashier/payments/${saleId}/stkpush/`);
-export const confirmPayment = (saleId, data) => api.post(`cashier/payments/${saleId}/confirm/`, data);
+export const initiateStkPush = (saleId) =>
+  api.post(`cashier/payments/${saleId}/stkpush/`);
+export const confirmPayment = (saleId, data) =>
+  api.post(`cashier/payments/${saleId}/confirm/`, data);
 export const getDashboardStats = () => api.get("cashier/dashboard/");
 
-export default api;
+// Password Management Endpoints
+export const changePassword = (data, token) =>
+  api.post("change-password/", data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const resetPasswordRequest = (data) =>
+  api.post("reset-password-request/", data);
+export const firstLoginChangePassword = (data) =>
+  api.post("first-login-change-password/", data);
 
+export default api;
