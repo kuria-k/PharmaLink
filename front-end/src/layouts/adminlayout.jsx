@@ -20,7 +20,7 @@ const AdminLayout = () => {
 
         // Show modal
         setShowModal(true);
-      }, 600 * 60 * 1000); //  1 minute
+      }, 1000 * 60 * 1000); //  1 minute
     };
 
     // Listen for user activity
