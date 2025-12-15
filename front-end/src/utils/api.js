@@ -455,6 +455,7 @@ export const authorizeSale = (username, password) =>
   api
     .post("/sales/authorize-sale/", { username, password })
     .then((res) => res.data);
+export const getUserById = (id) => api.get(`/users/${id}/`);
 
 
 

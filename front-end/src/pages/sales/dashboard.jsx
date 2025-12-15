@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getSales, getCustomers } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
+import { Receipt, User, CalendarDays } from "lucide-react";
 
 const SalesDashboard = () => {
   const [stats, setStats] = useState({
@@ -113,35 +114,84 @@ const SalesDashboard = () => {
       </div>
 
       {/* Recent Sales Table */}
-      <div className="glass p-6">
-        <h2 className="text-xl font-bold text-[#B57C36] mb-4">Recent Sales</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-[#B57C36]/20 text-[#B57C36]">
-                <th className="p-3 text-left">Invoice</th>
-                <th className="p-3 text-left">Customer</th>
-                <th className="p-3 text-left">Total</th>
-                <th className="p-3 text-left">Date</th>
+     <div className="relative rounded-2xl bg-white/70 backdrop-blur-xl shadow-xl border border-white/30 p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-2xl font-bold text-[#B57C36] flex items-center gap-2">
+          <Receipt className="w-6 h-6" />
+          Recent Sales
+        </h2>
+        <span className="text-sm text-gray-500">
+          Last {recentSales.length} transactions
+        </span>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto rounded-xl">
+        <table className="w-full text-sm">
+          <thead className="sticky top-0 z-10">
+            <tr className="bg-gradient-to-r from-[#B57C36]/20 to-[#B57C36]/10 text-[#B57C36]">
+              <th className="p-4 text-left font-semibold">Invoice</th>
+              <th className="p-4 text-left font-semibold">Customer</th>
+              <th className="p-4 text-left font-semibold">Total</th>
+              <th className="p-4 text-left font-semibold">Date</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {recentSales.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="p-8 text-center text-gray-400">
+                  No recent sales yet 🚀
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {recentSales.map((sale) => (
-                <tr key={sale.id} className="border-b hover:bg-gray-50">
-                  <td className="p-3">{sale.invoice_number || "-"}</td>
-                  <td className="p-3">{sale.customer_name || "Walk-in"}</td>
-                  <td className="p-3">
-                    Ksh {Number(sale.total_amount).toLocaleString()}
+            ) : (
+              recentSales.map((sale) => (
+                <tr
+                  key={sale.id}
+                  className="group border-b border-gray-100 hover:bg-[#B57C36]/5 transition-all duration-200"
+                >
+                  {/* Invoice */}
+                  <td className="p-4">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#B57C36]/10 text-[#B57C36] font-medium">
+                      {sale.invoice_number || "—"}
+                    </span>
                   </td>
-                  <td className="p-3">
-                    {new Date(sale.created_at).toLocaleDateString()}
+
+                  {/* Customer */}
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#B57C36] to-[#8a5a2b] text-white flex items-center justify-center font-bold uppercase">
+                        {(sale.customer_name || "W")[0]}
+                      </div>
+                      <span className="font-medium text-gray-700">
+                        {sale.customer_name || "Walk-in Customer"}
+                      </span>
+                    </div>
+                  </td>
+
+                  {/* Total */}
+                  <td className="p-4 font-semibold text-gray-900">
+                    Ksh{" "}
+                    <span className="text-lg">
+                      {Number(sale.total_amount).toLocaleString()}
+                    </span>
+                  </td>
+
+                  {/* Date */}
+                  <td className="p-4 text-gray-500">
+                    <div className="flex items-center gap-2">
+                      <CalendarDays className="w-4 h-4 text-[#B57C36]" />
+                      {new Date(sale.created_at).toLocaleDateString()}
+                    </div>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
+    </div>
 
       {/* Quick Actions */}
       {/* <div className="glass p-6 grid grid-cols-1 md:grid-cols-3 gap-6">

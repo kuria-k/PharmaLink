@@ -80,7 +80,7 @@ const SalesSidebar = () => {
   const navItems = [
     { label: "Dashboard", path: "/sales/dashboard" },
     { label: "Invoices", path: "/sales/invoices" },
-    { label: "Customers", path: "/sales/customers" },
+    { label: "Member set-up", path: "/sales/customers" },
     { label: "Reports", path: "/sales/reports" },
   ];
 
