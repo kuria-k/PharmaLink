@@ -5,9 +5,10 @@ from sales.models import Sale
 
 class SaleSummarySerializer(serializers.ModelSerializer):
     """Lightweight serializer for sale details inside payment record."""
+    posted_by = serializers.ReadOnlyField(source="posted_by.username")
     class Meta:
         model = Sale
-        fields = ['id', 'invoice_number', 'customer_name', 'total_amount']
+        fields = ['id', 'invoice_number', 'customer_name', 'total_amount','posted_by']
 
 
 class PaymentRecordSerializer(serializers.ModelSerializer):

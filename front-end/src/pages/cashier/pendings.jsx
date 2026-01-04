@@ -417,7 +417,6 @@
 //   </div>
 // </div>
 
-
 //               {/* Amount Paid Input */}
 //               <div>
 //                 <label className="block mb-2 text-gray-700 font-semibold text-sm">
@@ -664,7 +663,7 @@
 
 import React, { useEffect, useState } from "react";
 import { getPayments, confirmPayment, initiateStkPush } from "../../utils/api";
-import { getUserById } from "../../utils/api"; 
+import { getUserById } from "../../utils/api";
 import {
   FiDollarSign,
   FiUser,
@@ -700,10 +699,18 @@ const PendingPayments = ({ currentUser }) => {
     }
   };
 
+  // const fetchPostedByUser = async (userId) => {
+  //   try {
+  //     const res = await getUserById(userId);
+  //     setPostedByUser(res.data);
+  //   } catch (err) {
+  //     setPostedByUser({ name: "Unknown User" });
+  //   }
+  // };
   const fetchPostedByUser = async (userId) => {
     try {
       const res = await getUserById(userId);
-      setPostedByUser(res.data);
+      setPostedByUser({ name: res.data.username });
     } catch (err) {
       setPostedByUser({ name: "Unknown User" });
     }
@@ -759,7 +766,6 @@ const PendingPayments = ({ currentUser }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
-
         <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-xl border border-[#B57C36]/20 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -861,7 +867,6 @@ const PendingPayments = ({ currentUser }) => {
                   ))
                 )}
               </tbody>
-
             </table>
           </div>
         </div>
@@ -871,7 +876,6 @@ const PendingPayments = ({ currentUser }) => {
       {selectedPayment && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 p-4">
           <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-lg border border-[#B57C36]/30 animate-fadeIn">
-
             <div className="bg-gradient-to-r from-[#B57C36] to-[#a56b2f] text-white p-6 rounded-t-2xl">
               <h2 className="text-2xl font-bold text-center">
                 Confirm Payment
@@ -879,7 +883,6 @@ const PendingPayments = ({ currentUser }) => {
             </div>
 
             <div className="p-6 space-y-6">
-
               <div className="bg-[#B57C36]/5 rounded-xl p-4 space-y-3 border border-[#B57C36]/20">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Invoice Number</span>
@@ -898,7 +901,7 @@ const PendingPayments = ({ currentUser }) => {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Posted By</span>
                   <span className="font-semibold text-gray-800">
-                    {postedByUser ? postedByUser.name : "Loading..."}
+                    {selectedPayment.sale?.posted_by || "N/A"}
                   </span>
                 </div>
 
@@ -1013,7 +1016,6 @@ const PendingPayments = ({ currentUser }) => {
                   )}
                 </button>
               </div>
-
             </div>
           </div>
         </div>
@@ -1023,7 +1025,6 @@ const PendingPayments = ({ currentUser }) => {
       {stkModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 p-4">
           <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-md border border-green-500/30 animate-fadeIn">
-
             <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-6 rounded-t-2xl">
               <div className="flex items-center justify-center mb-2">
                 <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
@@ -1036,7 +1037,6 @@ const PendingPayments = ({ currentUser }) => {
             </div>
 
             <div className="p-6 space-y-6">
-
               <p className="text-gray-600 text-center">
                 Enter customer phone number to initiate payment request
               </p>
@@ -1141,15 +1141,12 @@ const PendingPayments = ({ currentUser }) => {
                   </div>
                 </div>
               )}
-
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 };
 
 export default PendingPayments;
-

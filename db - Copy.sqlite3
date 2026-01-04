@@ -1,2 +1,0 @@
-DELETE FROM sales_sale
-WHERE id BETWEEN 92 AND 122;
