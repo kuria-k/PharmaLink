@@ -18,7 +18,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Development settings
 SECRET_KEY = "django-insecure-i#_zmo&a=r-n5&$ph_rvb$d&5%y*_tq28uy&lrmsuz-37)6w7m"
 DEBUG = True
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+# ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["pharmalink-u866.onrender.com"]
 
 # Installed apps
 INSTALLED_APPS = [
